@@ -11,7 +11,9 @@ interface Codex {
   title: string;
 }
 
-export default function GlobalImportPage() {
+import { Suspense } from "react";
+
+function GlobalImportContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectCodexId = searchParams.get("codexId") || "";
@@ -282,5 +284,19 @@ export default function GlobalImportPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function GlobalImportPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
+        <div className="font-mono text-xs text-[var(--color-gold-muted)] tracking-[0.3em] animate-pulse">
+          [ MENYIAPKAN ALTAR TRANSMUTASI... ]
+        </div>
+      </div>
+    }>
+      <GlobalImportContent />
+    </Suspense>
   );
 }
