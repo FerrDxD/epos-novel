@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Amphoreus "Night of Chrysos" (Dark Mode) */
+  --color-bg: #0F111A; /* Deep celestial night */
+  --color-surface: #171924; /* Night sky panel */
+  --color-surface-2: #212433; /* Elevated panel */
+  
+  --color-border: #4A4657; /* Starry border */
+  --color-gold: #E8D08D; /* Chrysos brilliant gold */
+  --color-gold-muted: rgba(232, 208, 141, 0.3); /* Soft divine glow */
+  --color-crimson: #C15C5C; /* Fate's red thread */
+  
+  --color-text: #F2EFE9; /* Starlight white */
+  --color-text-muted: #9F9EA6; /* Distant star grey */
+  --color-on-primary: #0F111A;
+  
+  --color-primary: var(--color-gold);
+  --color-primary-hover: #FDE08B;
+  --color-secondary: var(--color-crimson);
+}
+
+[data-theme="light"] {
+  /* Amphoreus "Dawn of Strife" (Pearlescent celestial light) */
+  --color-bg: #F4F5F8; /* Pearlescent white with blue hint */
+  --color-surface: #EBEFF2; /* Marble surface */
+  --color-surface-2: #DFE4E8; /* Deep marble */
+  
+  --color-border: #B8C5D1; /* Ionian marble veins */
+  --color-gold: #C29A38; /* Olympian gold */
+  --color-gold-muted: rgba(194, 154, 56, 0.3);
+  --color-crimson: #A34E4E;
+  
+  --color-text: #1C2633; /* Deep celestial navy */
+  --color-text-muted: #6B7C93; /* Starlight shadow */
+  --color-on-primary: #F4F5F8;
+  
+  --color-primary: var(--color-gold);
+  --color-primary-hover: #D4AF37;
+  --color-secondary: var(--color-crimson);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  overflow-x: hidden;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-cinzel), serif; }
+  .font-body { font-family: var(--font-cormorant), serif; }
+  .font-mono { font-family: var(--font-courier), monospace; }
+
+  /* Amphoreus Glass & Gold Panel */
+  .tome-border {
+    border: 1px solid var(--color-gold-muted);
+    position: relative;
+    background: linear-gradient(135deg, rgba(33, 36, 51, 0.4) 0%, rgba(23, 25, 36, 0.8) 100%);
+    backdrop-filter: blur(12px);
+    border-radius: 8px;
+    box-shadow: inset 0 0 20px rgba(232, 208, 141, 0.05), 0 4px 20px rgba(0,0,0,0.2);
+  }
+  
+  [data-theme="light"] .tome-border {
+    background: linear-gradient(135deg, rgba(248, 246, 242, 0.6) 0%, rgba(240, 235, 225, 0.9) 100%);
+    box-shadow: inset 0 0 20px rgba(192, 154, 83, 0.05), 0 4px 20px rgba(0,0,0,0.05);
+  }
+  
+  .tome-border::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid var(--color-gold-muted);
+    border-radius: 5px;
+    pointer-events: none;
+    transition: border-color 0.5s ease;
+    opacity: 0.5;
+  }
+  
+  .tome-border:hover::before {
+    border-color: var(--color-gold);
+    opacity: 1;
+  }
+
+  /* Mysterious decryption animation -> Celestial reveal */
+  .encrypt-reveal {
+    animation: reveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  @keyframes reveal {
+    0% { filter: blur(12px); opacity: 0; letter-spacing: 1em; transform: translateY(10px); }
+    100% { filter: blur(0); opacity: 1; letter-spacing: 0.2em; transform: translateY(0); }
+  }
+
+  /* Elegant Olympian dividers */
+  .ornate-divider-v {
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--color-gold), transparent);
+    opacity: 0.5;
+  }
+  
+  .ornate-divider-h {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+    opacity: 0.5;
+  }
+  
+  /* Inputs styling adjustment */
+  .rounded-input {
+    border-radius: 4px;
+  }
+  .rounded-card {
+    border-radius: 8px;
+  }
+}
+
+/* Amphoreus Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold-muted);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold-muted) transparent;
+}
