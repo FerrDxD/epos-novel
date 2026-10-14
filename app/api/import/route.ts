@@ -11,6 +11,8 @@ import { parseJson } from "../../../lib/parsers/json";
 import { fetchGoogleDoc, fetchGoogleDrive } from "../../../lib/parsers/gdocs";
 import { sanitizeHtml } from "../../../lib/sanitize";
 import { checkRateLimit } from "../../../lib/rate-limit";
+import { checkTokenBudget, estimateTokens } from "../../../lib/ai-helpers";
+import { usageLogs } from "../../../lib/db/schema";
 
 const ALLOWED_SOURCE_TYPES = ["docx", "pdf", "md", "json", "gdocs", "gdrive"] as const;
 
@@ -75,6 +77,9 @@ export async function POST(req: Request) {
 
     if (!codex) return NextResponse.json({ error: "Codex tidak ditemukan" }, { status: 404 });
 
+    // Cost guard: estimate + reject huge inputs before Gemini call — log usage on success/fail
+    // We estimate after parsing, so this is a second guard (prompt guard inside gemini.ts is first).
+
     const sourceName = file ? file.name : url ? new URL(url).hostname : "Unknown Source";
     
     const [log] = await db.insert(importLogs).values({
@@ -105,7 +110,33 @@ export async function POST(req: Request) {
 
       if (!parsedText.trim()) throw new Error("Gagal mengekstrak teks atau teks kosong");
 
+      const budget = checkTokenBudget(parsedText.length);
+      if (!budget.ok) {
+        await db.insert(usageLogs).values({
+          userId: session.user.id,
+          codexId,
+          importLogId: log.id,
+          action: "import_extract",
+          inputChars: parsedText.length,
+          estimatedTokens: estimateTokens(parsedText.length),
+        });
+        await db.update(importLogs).set({ status: "failed", errorMessage: budget.reason }).where(eq(importLogs.id, log.id));
+        return NextResponse.json({ error: budget.reason }, { status: 413 });
+      }
+
       const extractedLore = await extractLoreFromText(parsedText, codex.title, codex.genre || "Fiksi");
+
+      // Log usage on success path
+      try {
+        await db.insert(usageLogs).values({
+          userId: session.user.id,
+          codexId,
+          importLogId: log.id,
+          action: "import_extract",
+          inputChars: parsedText.length,
+          estimatedTokens: estimateTokens(parsedText.length),
+        });
+      } catch {}
 
       let totalExtracted = 0;
       const categories = ["characters", "locations", "factions", "events", "concepts", "monsters"] as const;
@@ -158,7 +189,7 @@ export async function POST(req: Request) {
       console.error("Import processing error:", parseExtractError);
       
       await db.update(importLogs)
-        .set({ status: "failed" })
+        .set({ status: "failed", errorMessage: String(parseExtractError.message || "Gagal memproses").slice(0, 500) })
         .where(eq(importLogs.id, log.id));
 
       return NextResponse.json({ error: parseExtractError.message || "Gagal memproses file/URL" }, { status: 500 });

@@ -109,6 +109,7 @@ export const importLogs = pgTable(
     sourceName: text("source_name").notNull(),
     entriesExtracted: integer("entries_extracted").notNull().default(0),
     status: text("status").notNull().default("pending"),
+    errorMessage: text("error_message"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => ({
@@ -117,11 +118,33 @@ export const importLogs = pgTable(
   })
 );
 
+// 6. M3: usage logs — token/cost guard
+export const usageLogs = pgTable(
+  "usage_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    codexId: uuid("codex_id").references(() => codexes.id, { onDelete: "cascade" }),
+    importLogId: uuid("import_log_id").references(() => importLogs.id, { onDelete: "set null" }),
+    action: text("action").notNull(), // 'import_extract' | 'summary' | 'consistency_check'
+    inputChars: integer("input_chars").notNull().default(0),
+    estimatedTokens: integer("estimated_tokens").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    userIdx: index("usage_logs_user_idx").on(t.userId),
+    createdIdx: index("usage_logs_created_idx").on(t.createdAt),
+  })
+);
+
 // Relationships
 export const usersRelations = relations(users, ({ many }) => ({
   codexes: many(codexes),
   entries: many(entries),
   importLogs: many(importLogs),
+  usageLogs: many(usageLogs),
 }));
 
 export const codexesRelations = relations(codexes, ({ one, many }) => ({
@@ -172,5 +195,20 @@ export const importLogsRelations = relations(importLogs, ({ one }) => ({
   codex: one(codexes, {
     fields: [importLogs.codexId],
     references: [codexes.id],
+  }),
+}));
+
+export const usageLogsRelations = relations(usageLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [usageLogs.userId],
+    references: [users.id],
+  }),
+  codex: one(codexes, {
+    fields: [usageLogs.codexId],
+    references: [codexes.id],
+  }),
+  importLog: one(importLogs, {
+    fields: [usageLogs.importLogId],
+    references: [importLogs.id],
   }),
 }));
