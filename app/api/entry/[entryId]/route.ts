@@ -4,6 +4,7 @@ import { entries, codexes, entryRelations } from "../../../../lib/db/schema";
 import { auth } from "../../../../lib/auth";
 import { eq, and, or, sql } from "drizzle-orm";
 import { entryPatchSchema, formatZodError } from "../../../../lib/validators";
+import { sanitizeHtml } from "../../../../lib/sanitize";
 
 export async function GET(
   req: Request,
@@ -47,9 +48,15 @@ export async function PATCH(
       return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
     }
 
+    // Sanitize content if present
+    const patch: Record<string, unknown> = { ...parsed.data };
+    if (typeof patch.content === "string") {
+      patch.content = sanitizeHtml(patch.content);
+    }
+
     const [updated] = await db
       .update(entries)
-      .set({ ...parsed.data, updatedAt: new Date() })
+      .set({ ...patch, updatedAt: new Date() })
       .where(and(eq(entries.id, params.entryId), eq(entries.userId, session.user.id)))
       .returning();
 

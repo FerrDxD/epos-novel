@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { db } from "./db";
 import { users } from "./db/schema";
-import { eq, or } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -21,17 +21,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const identifier = credentials.identifier as string;
+        const raw = credentials.identifier as string;
+        const lower = raw.toLowerCase().trim();
         const password = credentials.password as string;
 
-        // Search user by email or username
+        // Case-insensitive email & username lookup
         const [user] = await db
           .select()
           .from(users)
           .where(
             or(
-              eq(users.email, identifier),
-              eq(users.username, identifier)
+              sql`lower(${users.email}) = ${lower}`,
+              sql`lower(${users.username}) = ${lower}`
             )
           )
           .limit(1);

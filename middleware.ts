@@ -7,17 +7,28 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const { nextUrl } = req;
+  const pathname = nextUrl.pathname;
+
+  const isApiRoute = pathname.startsWith("/api/");
+  // API yang boleh tanpa login: register + next-auth itself
+  const isPublicApi =
+    pathname.startsWith("/api/auth/");
 
   const isProtectedRoute =
-    nextUrl.pathname.startsWith("/dashboard") ||
-    nextUrl.pathname.startsWith("/codex") ||
-    nextUrl.pathname.startsWith("/import");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/codex") ||
+    pathname.startsWith("/import") ||
+    (isApiRoute && !isPublicApi);
 
   const isAuthRoute =
-    nextUrl.pathname.startsWith("/login") ||
-    nextUrl.pathname.startsWith("/register");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register");
 
+  // API protection: return 401 JSON, bukan redirect
   if (isProtectedRoute && !isLoggedIn) {
+    if (isApiRoute) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return Response.redirect(new URL("/login", nextUrl));
   }
 
@@ -37,5 +48,6 @@ export const config = {
     "/import/:path*",
     "/login",
     "/register",
+    "/api/:path*",
   ],
 };

@@ -5,6 +5,8 @@ import { auth } from "../../../lib/auth";
 import { eq, and, sql } from "drizzle-orm";
 import { generateEntrySummary } from "../../../lib/gemini";
 import { entryCreateSchema, categoryEnum, formatZodError } from "../../../lib/validators";
+import { sanitizeHtml } from "../../../lib/sanitize";
+import { checkRateLimit } from "../../../lib/rate-limit";
 
 export async function GET(req: Request) {
   try {
@@ -17,7 +19,6 @@ export async function GET(req: Request) {
 
     if (!codexId) return NextResponse.json({ error: "codexId is required" }, { status: 400 });
 
-    // Validate category if provided
     if (category) {
       const catParsed = categoryEnum.safeParse(category);
       if (!catParsed.success) return NextResponse.json({ error: formatZodError(catParsed.error) }, { status: 400 });
@@ -43,6 +44,16 @@ export async function POST(req: Request) {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    // Rate limit: 30 entry creates per user per minute
+    const rl = checkRateLimit(`entry:create:${session.user.id}`, 30, 60 * 1000);
+    if (!rl.success) {
+      const retryAfter = Math.ceil(rl.resetMs / 1000);
+      return NextResponse.json(
+        { error: `Terlalu cepat. Coba lagi dalam ${retryAfter} detik.` },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     const body = await req.json();
     const parsed = entryCreateSchema.safeParse(body);
     if (!parsed.success) {
@@ -50,8 +61,11 @@ export async function POST(req: Request) {
     }
     let { codexId, category, title, summary, content, tags, metadata } = parsed.data;
 
+    // Sanitize rich content before storing
+    const cleanContent = content ? sanitizeHtml(content) : "";
+
     if (!summary) {
-      summary = await generateEntrySummary({ title, content: content || "" }, category);
+      summary = await generateEntrySummary({ title, content: cleanContent || "" }, category);
     }
 
     const [newEntry] = await db
@@ -62,7 +76,7 @@ export async function POST(req: Request) {
         category,
         title,
         summary: summary || "",
-        content: content || "",
+        content: cleanContent,
         tags: tags || [],
         metadata: metadata || {},
       })

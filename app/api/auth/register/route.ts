@@ -4,9 +4,21 @@ import { eq, or } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { registerSchema, formatZodError } from "../../../../lib/validators";
+import { checkRateLimit, getClientIp } from "../../../../lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
+    // Rate limit: 5 registrations per IP per hour
+    const ip = getClientIp(req);
+    const rl = checkRateLimit(`register:${ip}`, 5, 60 * 60 * 1000);
+    if (!rl.success) {
+      const retryAfter = Math.ceil(rl.resetMs / 1000);
+      return NextResponse.json(
+        { message: `Terlalu banyak percobaan. Coba lagi dalam ${Math.ceil(retryAfter / 60)} menit.` },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
