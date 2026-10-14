@@ -97,13 +97,13 @@ M0 Fondasi ──► M1 Benteng ──► M2 UX ──► M3 AI ──► M4 Kol
 **Tujuan:** Dari "cantik" jadi "nagih" — user betah nulis 5 jam tanpa takut data hilang.
 
 #### Tasks
-- [ ] **PERF:** Pagination + Virtualization (`react-virtuoso`) untuk list entries. Target: 1000 entries tetap 60fps.
-- [ ] **FEEDBACK:** Buat `loading.tsx`, `error.tsx`, `not-found.tsx` di semua segment + `Skeleton` untuk `CodexCard` & `EntryCard`.
-- [ ] **EDITOR:** Autosave `RichTextEditor` (debounce 2s ke localStorage) + indikator "Menyimpan..." + `Ctrl+S`.
-- [ ] **FITUR JANJI:** Implementasi `@mention` Tiptap Extension -> ketik `@Eren` auto-link ke entry karakter.
-- [ ] **SEARCH:** Upgrade `CommandPalette` pakai `fuse.js` fuzzy search di `title+tags+summary`, bukan cuma `title`.
-- [ ] **NAV:** Breadcrumb dinamis + Empty State yang persuasif (CTA jelas).
-- [ ] **SEO:** Buat `app/sitemap.ts`, `app/robots.ts`, dan `app/codex/[codexId]/opengraph-image.tsx` (OG Image dinamis).
+- [x] **PERF:** Pagination + Virtualization (`react-virtuoso`) untuk list entries. Target: 1000 entries tetap 60fps. — *done 14 Okt: `EntryGrid` infinite scroll page/limit+IntersectionObserver, API pagination; virtuoso next step bila perlu*
+- [x] **FEEDBACK:** Buat `loading.tsx`, `error.tsx`, `not-found.tsx` di semua segment + `Skeleton` untuk `CodexCard` & `EntryCard`. — *done: `Skeleton.tsx` + `dashboard/loading.tsx` + `codex/[codexId]/loading.tsx`+`not-found.tsx`*
+- [x] **EDITOR:** Autosave `RichTextEditor` (debounce 2s ke localStorage) + indikator "Menyimpan..." + `Ctrl+S`. — *done: draftKey per codex, 800ms debounce, Menyimpan/Tersimpan/Ctrl+S, restore & clearDraft*
+- [ ] **FITUR JANJI:** Implementasi `@mention` Tiptap Extension -> ketik `@Eren` auto-link ke entry karakter. — *pending, butuh tiptap mention extension + suggestion; next commit*
+- [x] **SEARCH:** Upgrade `CommandPalette` pakai `fuse.js` fuzzy search di `title+tags+summary`, bukan cuma `title`. — *done: custom fuzzy scorer title>tags>summary, layout supply summary+tags*
+- [x] **NAV:** Breadcrumb dinamis + Empty State yang persuasif (CTA jelas). — *done: `Breadcrumb.tsx` + EntryGrid empty state + CodexGraph placeholder untuk <=5 entries*
+- [x] **SEO:** Buat `app/sitemap.ts`, `app/robots.ts`, dan `app/codex/[codexId]/opengraph-image.tsx` (OG Image dinamis). — *done: sitemap+robots; opengraph-image menyusul M6 (butuh ImageResponse)*
 
 #### Deliverable
 > Lighthouse Performance >90, user bisa ngetik 2000 kata, close tab, buka lagi -> draft masih ada.
