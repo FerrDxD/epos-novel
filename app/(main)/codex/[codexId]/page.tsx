@@ -5,9 +5,8 @@ import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Edit, Trash2, Plus, Upload, LayoutGrid, Network } from "lucide-react";
-import ThemeToggle from "../../../../components/ui/ThemeToggle";
 import CategoryBadge, { CATEGORY_COLORS, CategoryType } from "../../../../components/codex/CategoryBadge";
-import EntryCard from "../../../../components/entry/EntryCard";
+import EntryGrid from "../../../../components/entry/EntryGrid";
 import CodexGraph from "../../../../components/codex/CodexGraph";
 
 export default async function CodexDetailPage({ params, searchParams }: { params: { codexId: string }, searchParams: { view?: string } }) {
@@ -29,7 +28,8 @@ export default async function CodexDetailPage({ params, searchParams }: { params
     .select()
     .from(entries)
     .where(eq(entries.codexId, codexId))
-    .orderBy(desc(entries.updatedAt));
+    .orderBy(desc(entries.updatedAt))
+    .limit(12); // initial page; rest via infinite scroll
 
   const relations = await db
     .select()
@@ -152,30 +152,7 @@ export default async function CodexDetailPage({ params, searchParams }: { params
             <CodexGraph codexId={codexId} entries={codexEntries} relations={relations} />
           </div>
         ) : (
-          <div>
-            {codexEntries.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 border border-[var(--color-border)] bg-[var(--color-surface)]/30 text-center px-4">
-                <h3 className="font-display font-bold text-2xl text-[var(--color-gold)] mb-4 tracking-widest uppercase">
-                  Lembaran Kosong
-                </h3>
-                <p className="font-body text-xl text-[var(--color-text-muted)] mb-8 italic max-w-lg">
-                  Belum ada goresan tinta sejarah, tokoh, maupun tempat di dalam kitab ini.
-                </p>
-                <Link
-                  href={`/codex/${codexId}/entry/new`}
-                  className="px-8 py-3 border border-[var(--color-gold-muted)] hover:border-[var(--color-gold)] text-[var(--color-gold)] font-display text-xs font-bold tracking-[0.2em] uppercase transition-colors"
-                >
-                  Pahat Lembaran Pertama
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {codexEntries.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} />
-                ))}
-              </div>
-            )}
-          </div>
+          <EntryGrid codexId={codexId} initialEntries={codexEntries as any} totalCount={codex.entryCount} />
         )}
       </main>
     </div>

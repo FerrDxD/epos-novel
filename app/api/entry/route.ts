@@ -16,6 +16,9 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const codexId = searchParams.get("codexId");
     const category = searchParams.get("category");
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "12", 10) || 12));
+    const offset = (page - 1) * limit;
 
     if (!codexId) return NextResponse.json({ error: "codexId is required" }, { status: 400 });
 
@@ -27,10 +30,21 @@ export async function GET(req: Request) {
     const conditions = [eq(entries.codexId, codexId), eq(entries.userId, session.user.id)];
     if (category) conditions.push(eq(entries.category, category as any));
 
+    // Backward-compat: if no pagination params, return plain array (old clients)
+    const hasPagination = searchParams.has("page") || searchParams.has("limit");
+    if (!hasPagination) {
+      const results = await db.select().from(entries).where(and(...conditions));
+      return NextResponse.json(results);
+    }
+
+    const { desc } = await import("drizzle-orm");
     const results = await db
       .select()
       .from(entries)
-      .where(and(...conditions));
+      .where(and(...conditions))
+      .orderBy(desc(entries.updatedAt))
+      .limit(limit)
+      .offset(offset);
 
     return NextResponse.json(results);
   } catch (error) {

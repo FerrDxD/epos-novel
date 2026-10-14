@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Book, User, Map, Flag, Clock, Lightbulb, Ghost } from "lucide-react";
 import { CATEGORY_LABELS } from "../codex/CategoryBadge";
 
 interface CommandPaletteProps {
   codexId: string;
-  entries: { id: string; title: string; category: string }[];
+  entries: { id: string; title: string; category: string; summary?: string | null; tags?: string[] }[];
 }
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -18,6 +18,29 @@ const CATEGORY_ICONS: Record<string, any> = {
   concepts: Lightbulb,
   monsters: Ghost,
 };
+
+function score(entry: CommandPaletteProps["entries"][number], q: string): number {
+  const t = entry.title.toLowerCase();
+  const s = (entry.summary || "").toLowerCase();
+  const tags = (entry.tags || []).join(" ").toLowerCase();
+  const query = q.toLowerCase();
+
+  // Exact title match wins
+  if (t === query) return 100;
+  if (t.startsWith(query)) return 80;
+  if (t.includes(query)) return 60;
+  if (tags.includes(query)) return 40;
+  if (s.includes(query)) return 20;
+
+  // Fuzzy: characters appear in order
+  let ti = 0, qi = 0;
+  while (ti < t.length && qi < query.length) {
+    if (t[ti] === query[qi]) qi++;
+    ti++;
+  }
+  if (qi === query.length) return 10;
+  return -1;
+}
 
 export default function CommandPalette({ codexId, entries }: CommandPaletteProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,9 +59,19 @@ export default function CommandPalette({ codexId, entries }: CommandPaletteProps
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  if (!isOpen) return null;
+  const filtered = useMemo(() => {
+    const q = query.trim();
+    if (!q) return entries.slice(0, 8);
+    const scored = entries
+      .map((e) => ({ e, s: score(e, q) }))
+      .filter((x) => x.s >= 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 8)
+      .map((x) => x.e);
+    return scored;
+  }, [entries, query]);
 
-  const filteredEntries = entries.filter(e => e.title.toLowerCase().includes(query.toLowerCase())).slice(0, 8);
+  if (!isOpen) return null;
 
   const handleSelect = (id: string) => {
     setIsOpen(false);
@@ -48,13 +81,7 @@ export default function CommandPalette({ codexId, entries }: CommandPaletteProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={() => setIsOpen(false)}
-      />
-      
-      {/* Modal */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
       <div className="relative w-full max-w-xl bg-[var(--color-surface)] border border-[var(--color-gold-muted)] rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(212,175,55,0.05)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center px-4 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]">
           <Search className="w-5 h-5 text-[var(--color-gold-muted)]" />
@@ -67,14 +94,11 @@ export default function CommandPalette({ codexId, entries }: CommandPaletteProps
           />
           <kbd className="font-mono text-[10px] uppercase text-[var(--color-text-muted)] border border-[var(--color-border)] px-2 py-1 rounded bg-[var(--color-bg)]">ESC</kbd>
         </div>
-        
         <div className="max-h-[60vh] overflow-y-auto custom-scrollbar p-2">
-          {filteredEntries.length === 0 ? (
-            <div className="text-center py-10 font-body text-lg italic text-[var(--color-text-muted)]">
-              Tak ada catatan yang sesuai dengan pencarian Anda.
-            </div>
+          {filtered.length === 0 ? (
+            <div className="text-center py-10 font-body text-lg italic text-[var(--color-text-muted)]">Tak ada catatan yang sesuai dengan pencarian Anda.</div>
           ) : (
-            filteredEntries.map((entry) => {
+            filtered.map((entry) => {
               const Icon = CATEGORY_ICONS[entry.category] || Book;
               return (
                 <button

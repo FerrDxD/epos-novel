@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Sparkles, X, Plus } from "lucide-react";
 import CategoryBadge, { CATEGORY_LABELS, CategoryType } from "../../../../../../components/codex/CategoryBadge";
 import ThemeToggle from "../../../../../../components/ui/ThemeToggle";
-import RichTextEditor from "../../../../../../components/ui/RichTextEditor";
+import RichTextEditor, { clearDraft } from "../../../../../../components/ui/RichTextEditor";
 
 const METADATA_SCHEMAS: Record<string, { key: string; label: string; type: "text" | "array" }[]> = {
   characters: [
@@ -54,6 +54,7 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
   const searchParams = useSearchParams();
   const defaultCat = searchParams.get("cat") || "characters";
 
+  const draftKey = `epos:draft:${params.codexId}:new`;
   const [category, setCategory] = useState(defaultCat);
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
@@ -64,6 +65,28 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Hydrate non-editor fields from draft
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(`${draftKey}:fields`);
+      if (!raw) return;
+      const f = JSON.parse(raw);
+      if (f.title) setTitle(f.title);
+      if (f.summary) setSummary(f.summary);
+      if (Array.isArray(f.tags)) setTags(f.tags);
+      if (f.metadata) setMetadata(f.metadata);
+      if (f.category) setCategory(f.category);
+    } catch {}
+  }, [draftKey]);
+
+  // Autosave non-editor fields (debounced)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try { localStorage.setItem(`${draftKey}:fields`, JSON.stringify({ title, summary, tags, metadata, category })); } catch {}
+    }, 800);
+    return () => clearTimeout(t);
+  }, [draftKey, title, summary, tags, metadata, category]);
 
   useEffect(() => {
     setMetadata({});
@@ -110,6 +133,12 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal membuat entri.");
+
+      // Clear autosave draft on success
+      try {
+        clearDraft(draftKey);
+        localStorage.removeItem(`${draftKey}:fields`);
+      } catch {}
 
       router.push(`/codex/${params.codexId}/entry/${data.id}`);
       router.refresh();
@@ -222,7 +251,8 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
                   </label>
                   <RichTextEditor 
                     content={content} 
-                    onChange={setContent} 
+                    onChange={setContent}
+                    draftKey={draftKey}
                     placeholder="Jabarkan sejarah, karakteristik, tragedi, atau kejayaan mereka di sini..."
                   />
                 </div>

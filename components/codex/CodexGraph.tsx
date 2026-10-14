@@ -36,15 +36,25 @@ export default function CodexGraph({ codexId, entries, relations }: Props) {
   // Resize observer to make graph responsive
   useEffect(() => {
     if (!containerRef.current) return;
-    const observer = new ResizeObserver((entries) => {
+    const obs = new ResizeObserver((entries) => {
       if (entries[0]) {
         const { width, height } = entries[0].contentRect;
         setDimensions({ width, height });
       }
     });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
   }, []);
+
+  // Early return: don't mount heavy ForceGraph for tiny codexes
+  if (entries.length <= 5) {
+    return (
+      <div className="w-full py-16 flex flex-col items-center justify-center border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/30 text-center">
+        <p className="font-display text-sm tracking-[0.2em] uppercase text-[var(--color-gold-muted)] mb-2">Jaring Takdir</p>
+        <p className="font-body italic text-[var(--color-text-muted)] max-w-md">Buat minimal 6 lembaran dengan relasi untuk melihat peta takdir. Graph akan muncul otomatis.</p>
+      </div>
+    );
+  }
 
   const graphData = {
     nodes: entries.map((e) => ({

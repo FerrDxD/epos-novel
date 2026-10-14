@@ -25,9 +25,9 @@ export default async function CodexLayout({
 
   if (!codex) notFound();
 
-  // Fetch all entries for Command Palette
+  // Fetch entries for Command Palette — include summary/tags for fuzzy search
   const allEntries = await db
-    .select({ id: entries.id, title: entries.title, category: entries.category })
+    .select({ id: entries.id, title: entries.title, category: entries.category, summary: entries.summary, tags: entries.tags })
     .from(entries)
     .where(eq(entries.codexId, params.codexId));
 
