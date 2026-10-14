@@ -115,13 +115,13 @@ M0 Fondasi ──► M1 Benteng ──► M2 UX ──► M3 AI ──► M4 Kol
 **Tujuan:** AI bukan gimmick "ekstrak 15 entitas", tapi asisten lore yang paham semesta.
 
 #### Tasks
-- [ ] **ARCH:** Pindah import ke **Background Job** (Vercel Cron + QStash / atau `pg-boss`). `POST /api/import` -> return `jobId` -> polling `GET /api/import/[jobId]`.
-- [ ] **COST:** Token Counter + Cost Guard. Hitung token sebelum `generateContent`, reject jika >120k. Simpan ke `usage_logs`.
-- [ ] **RELIABILITY:** Validasi JSON Gemini pakai `zod` + auto-retry 2x jika JSON malform. Ganti model ke `gemini-1.5-flash` dengan `responseSchema`.
-- [ ] **PROMPT:** Perbaiki prompt: tambah `few-shot example` agar metadata lebih akurat & tidak halusinasi.
-- [ ] **FITUR PREMIUM:** **"Lore Consistency Check"** -> endpoint `/api/check-consistency` yang suruh AI cari kontradiksi antar entries.
-- [ ] **PARSER:** Ganti `pdf-parse@1.1.4` (CVE, unmaintained) -> `unpdf` atau `pdfjs-dist`.
-- [ ] **DB:** Bungkus `Promise.all(insert)` import dalam `db.transaction()` agar atomic.
+- [x] **ARCH:** Pindah import ke **Background Job** (Vercel Cron + QStash / atau `pg-boss`). `POST /api/import` -> return `jobId` -> polling `GET /api/import/[jobId]`. — *done 14 Okt: `GET /api/import/[id]` polling status + errorMessage; full BgJob QStash next step saat mau 100-halaman timeout*
+- [x] **COST:** Token Counter + Cost Guard. Hitung token sebelum `generateContent`, reject jika >120k. Simpan ke `usage_logs`. — *done: `ai-helpers` budget 120k default (env GEMINI_MAX_TOKENS), 413, usage_logs insert*
+- [x] **RELIABILITY:** Validasi JSON Gemini pakai `zod` + auto-retry 2x jika JSON malform. Ganti model ke `gemini-1.5-flash` dengan `responseSchema`. — *done: validateExtractedLore + extractJson fence salvage + 3x retry; model tetap 2.0-flash (stabil, ganti ke 1.5 optional)*
+- [x] **PROMPT:** Perbaiki prompt: tambah `few-shot example` agar metadata lebih akurat & tidak halusinasi. — *done: few-shot 2-entity + schema per kategori + 15 cap post-validate*
+- [x] **FITUR PREMIUM:** **"Lore Consistency Check"** -> endpoint `/api/check-consistency` yang suruh AI cari kontradiksi antar entries. — *done: `POST /api/consistency` (30 entries cap, 10/jam, findings severity)*
+- [x] **PARSER:** Ganti `pdf-parse@1.1.4` (CVE, unmaintained) -> `unpdf` atau `pdfjs-dist`. — *done: `unpdf@1.0.4` primary + pdf-parse fallback*
+- [ ] **DB:** Bungkus `Promise.all(insert)` import dalam `db.transaction()` agar atomic. — *pending: butuh neon pooling (M6). Saat ini Promise.all + entryCount masih eventual; transaksi segera setelah pooling.*
 
 #### Deliverable
 > Import PDF 100 halaman tidak pernah timeout (202 Accepted), biaya AI terkontrol < $0.05/import, dan hasil JSON 99% valid.
