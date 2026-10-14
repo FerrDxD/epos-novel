@@ -4,6 +4,7 @@ import { entries, codexes } from "../../../lib/db/schema";
 import { auth } from "../../../lib/auth";
 import { eq, and, sql } from "drizzle-orm";
 import { generateEntrySummary } from "../../../lib/gemini";
+import { entryCreateSchema, categoryEnum, formatZodError } from "../../../lib/validators";
 
 export async function GET(req: Request) {
   try {
@@ -16,8 +17,14 @@ export async function GET(req: Request) {
 
     if (!codexId) return NextResponse.json({ error: "codexId is required" }, { status: 400 });
 
+    // Validate category if provided
+    if (category) {
+      const catParsed = categoryEnum.safeParse(category);
+      if (!catParsed.success) return NextResponse.json({ error: formatZodError(catParsed.error) }, { status: 400 });
+    }
+
     const conditions = [eq(entries.codexId, codexId), eq(entries.userId, session.user.id)];
-    if (category) conditions.push(eq(entries.category, category));
+    if (category) conditions.push(eq(entries.category, category as any));
 
     const results = await db
       .select()
@@ -37,14 +44,14 @@ export async function POST(req: Request) {
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    let { codexId, category, title, summary, content, tags, metadata } = body;
-
-    if (!codexId || !category || !title) {
-      return NextResponse.json({ error: "codexId, category, dan title wajib diisi" }, { status: 400 });
+    const parsed = entryCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
     }
+    let { codexId, category, title, summary, content, tags, metadata } = parsed.data;
 
     if (!summary) {
-      summary = await generateEntrySummary({ title, content }, category);
+      summary = await generateEntrySummary({ title, content: content || "" }, category);
     }
 
     const [newEntry] = await db
@@ -54,14 +61,13 @@ export async function POST(req: Request) {
         userId: session.user.id,
         category,
         title,
-        summary,
-        content,
+        summary: summary || "",
+        content: content || "",
         tags: tags || [],
         metadata: metadata || {},
       })
       .returning();
 
-    // Increment entryCount di codexes
     await db
       .update(codexes)
       .set({ entryCount: sql`${codexes.entryCount} + 1` })

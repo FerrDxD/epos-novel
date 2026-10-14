@@ -3,6 +3,7 @@ import { db } from "../../../../lib/db";
 import { entries, codexes, entryRelations } from "../../../../lib/db/schema";
 import { auth } from "../../../../lib/auth";
 import { eq, and, or, sql } from "drizzle-orm";
+import { entryPatchSchema, formatZodError } from "../../../../lib/validators";
 
 export async function GET(
   req: Request,
@@ -41,15 +42,14 @@ export async function PATCH(
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    
-    // Jangan ubah ID atau user/codex relasi
-    delete body.id;
-    delete body.userId;
-    delete body.codexId;
+    const parsed = entryPatchSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
+    }
 
     const [updated] = await db
       .update(entries)
-      .set({ ...body, updatedAt: new Date() })
+      .set({ ...parsed.data, updatedAt: new Date() })
       .where(and(eq(entries.id, params.entryId), eq(entries.userId, session.user.id)))
       .returning();
 
@@ -77,7 +77,6 @@ export async function DELETE(
 
     if (!deleted) return NextResponse.json({ error: "Entri tidak ditemukan" }, { status: 404 });
 
-    // Decrement entryCount di codexes
     await db
       .update(codexes)
       .set({ entryCount: sql`${codexes.entryCount} - 1` })

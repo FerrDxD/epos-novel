@@ -3,6 +3,7 @@ import { db } from "../../../lib/db";
 import { codexes } from "../../../lib/db/schema";
 import { auth } from "../../../lib/auth";
 import { eq, desc } from "drizzle-orm";
+import { codexCreateSchema, formatZodError } from "../../../lib/validators";
 
 export async function GET() {
   try {
@@ -32,19 +33,19 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, description, genre, coverColor } = body;
-
-    if (!title) {
-      return NextResponse.json({ error: "Judul codex wajib diisi" }, { status: 400 });
+    const parsed = codexCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
     }
+    const { title, description, genre, coverColor } = parsed.data;
 
     const [newCodex] = await db
       .insert(codexes)
       .values({
         userId: session.user.id,
         title,
-        description,
-        genre,
+        description: description ?? null,
+        genre: genre ?? null,
         coverColor: coverColor || "#7B2FBE",
       })
       .returning();

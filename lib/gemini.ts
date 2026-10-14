@@ -1,14 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { requireGeminiKey } from "./env";
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY is not defined");
+// Lazy model getter — never throws at import-time, only when actually called
+function getModel() {
+  const apiKey = requireGeminiKey();
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 }
-
-const genAI = new GoogleGenerativeAI(apiKey);
-
-// Using the fast 2.0 flash model
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 export type ExtractedEntry = {
   title: string;
@@ -33,12 +31,8 @@ export async function extractLoreFromText(
   codexGenre: string
 ): Promise<ExtractedLore> {
   try {
-    // Batasi teks maksimal 100.000 karakter (~30 halaman) agar tidak RTO/overload
     const truncatedText = text.length > 100000 ? text.slice(0, 100000) + "\n\n...[TEXT TRUNCATED]..." : text;
     
-    // Replace the massive original text with the truncated one manually, or just use substring
-    // Since prompt evaluates early, we will just slice the prompt if we know where the text starts
-    // Actually, let's just rebuild the prompt completely to be safe!
     const safePrompt = `
 Kamu adalah asisten analisis fiksi. Tugasmu adalah mengekstrak elemen world-building dari teks novel/cerita fiksi.
 
@@ -76,6 +70,7 @@ Teks untuk dianalisis:
 ${truncatedText}
 `;
 
+    const model = getModel();
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: safePrompt }] }],
       generationConfig: {
@@ -85,23 +80,19 @@ ${truncatedText}
     
     const response = result.response.text();
     
-    // Log raw response untuk debugging lokal
-    try {
-      require("fs").writeFileSync("gemini-debug.json", response);
-    } catch(e) {}
+    // Debug via console only — never write to filesystem (breaks on Vercel/Lambda)
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("[Gemini] Raw response length:", response.length);
+    }
 
     const parsed = JSON.parse(response);
     
-    // Handle jika AI membungkusnya dalam root object yang salah
     if (parsed.ExtractedLore) return parsed.ExtractedLore as ExtractedLore;
     if (parsed.extractedLore) return parsed.extractedLore as ExtractedLore;
     
     return parsed as ExtractedLore;
   } catch (error: any) {
     console.error("Gemini Extraction Error:", error);
-    try {
-      require("fs").writeFileSync("gemini-error.log", String(error.message || error));
-    } catch(e) {}
     throw new Error(`Sihir AI gagal mengekstrak naskah: ${error.message || "Unknown Error"}`);
   }
 }
@@ -120,6 +111,7 @@ Hanya kembalikan teks ringkasannya, tanpa tanda kutip atau penjelasan tambahan.
 `;
 
   try {
+    const model = getModel();
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
   } catch (error) {

@@ -3,6 +3,7 @@ import { db } from "../../../../lib/db";
 import { codexes, entries, entryRelations } from "../../../../lib/db/schema";
 import { auth } from "../../../../lib/auth";
 import { eq, and } from "drizzle-orm";
+import { codexPatchSchema, formatZodError } from "../../../../lib/validators";
 
 export async function GET(
   req: Request,
@@ -47,20 +48,20 @@ export async function PATCH(
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { codexId } = params;
     const body = await req.json();
-    const { title, description, genre, coverColor } = body;
+    const parsed = codexPatchSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
+    }
+    const patch = parsed.data;
+    if (Object.keys(patch).length === 0) {
+      return NextResponse.json({ error: "Tidak ada field untuk diupdate" }, { status: 400 });
+    }
 
     const [updatedCodex] = await db
       .update(codexes)
-      .set({
-        title,
-        description,
-        genre,
-        coverColor,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(codexes.id, codexId), eq(codexes.userId, session.user.id)))
+      .set({ ...patch, updatedAt: new Date() })
+      .where(and(eq(codexes.id, params.codexId), eq(codexes.userId, session.user.id)))
       .returning();
 
     if (!updatedCodex) return NextResponse.json({ error: "Codex tidak ditemukan" }, { status: 404 });

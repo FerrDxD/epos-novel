@@ -1,5 +1,18 @@
-import { pgTable, uuid, text, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, integer, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+// Enum — M0: cegah category ngawur
+export const categoryEnum = pgEnum("category", [
+  "characters",
+  "locations",
+  "factions",
+  "events",
+  "concepts",
+  "monsters",
+]);
+
+export const importStatusEnum = pgEnum("import_status", ["pending", "processing", "done", "failed"]);
+export const sourceTypeEnum = pgEnum("source_type", ["docx", "pdf", "md", "json", "gdocs", "gdrive"]);
 
 // 1. Table: users
 export const users = pgTable("users", {
@@ -29,56 +42,80 @@ export const codexes = pgTable("codexes", {
 });
 
 // 3. Table: entries
-export const entries = pgTable("entries", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  codexId: uuid("codex_id")
-    .notNull()
-    .references(() => codexes.id, { onDelete: "cascade" }),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  category: text("category").notNull(), // 'characters' | 'locations' | 'factions' | 'events' | 'concepts' | 'monsters'
-  title: text("title").notNull(),
-  summary: text("summary"),
-  content: text("content"), // Markdown detail
-  tags: text("tags").array().notNull(), // text[] in PostgreSQL
-  imageUrl: text("image_url"),
-  metadata: jsonb("metadata"), // category-specific JSON data
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const entries = pgTable(
+  "entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    codexId: uuid("codex_id")
+      .notNull()
+      .references(() => codexes.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    category: categoryEnum("category").notNull(),
+    title: text("title").notNull(),
+    summary: text("summary"),
+    content: text("content"),
+    tags: text("tags").array().notNull(),
+    imageUrl: text("image_url"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    codexIdx: index("entries_codex_idx").on(t.codexId),
+    userIdx: index("entries_user_idx").on(t.userId),
+    categoryIdx: index("entries_category_idx").on(t.category),
+    codexCategoryIdx: index("entries_codex_category_idx").on(t.codexId, t.category),
+  })
+);
 
 // 4. Table: entry relations
-export const entryRelations = pgTable("relations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  codexId: uuid("codex_id")
-    .notNull()
-    .references(() => codexes.id, { onDelete: "cascade" }),
-  sourceEntryId: uuid("source_entry_id")
-    .notNull()
-    .references(() => entries.id, { onDelete: "cascade" }),
-  targetEntryId: uuid("target_entry_id")
-    .notNull()
-    .references(() => entries.id, { onDelete: "cascade" }),
-  relationLabel: text("relation_label").notNull(), // e.g. "musuh", "sekutu", "tinggal di"
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const entryRelations = pgTable(
+  "relations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    codexId: uuid("codex_id")
+      .notNull()
+      .references(() => codexes.id, { onDelete: "cascade" }),
+    sourceEntryId: uuid("source_entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    targetEntryId: uuid("target_entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    relationLabel: text("relation_label").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    codexIdx: index("relations_codex_idx").on(t.codexId),
+    sourceIdx: index("relations_source_idx").on(t.sourceEntryId),
+    targetIdx: index("relations_target_idx").on(t.targetEntryId),
+  })
+);
 
 // 5. Table: importLogs
-export const importLogs = pgTable("import_logs", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  codexId: uuid("codex_id")
-    .notNull()
-    .references(() => codexes.id, { onDelete: "cascade" }),
-  sourceType: text("source_type").notNull(), // 'docx' | 'pdf' | 'md' | 'json' | 'gdocs' | 'gdrive'
-  sourceName: text("source_name").notNull(),
-  entriesExtracted: integer("entries_extracted").notNull().default(0),
-  status: text("status").notNull().default("pending"), // 'pending' | 'processing' | 'done' | 'failed'
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const importLogs = pgTable(
+  "import_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    codexId: uuid("codex_id")
+      .notNull()
+      .references(() => codexes.id, { onDelete: "cascade" }),
+    sourceType: text("source_type").notNull(),
+    sourceName: text("source_name").notNull(),
+    entriesExtracted: integer("entries_extracted").notNull().default(0),
+    status: text("status").notNull().default("pending"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    userIdx: index("import_logs_user_idx").on(t.userId),
+    codexIdx: index("import_logs_codex_idx").on(t.codexId),
+  })
+);
 
 // Relationships
 export const usersRelations = relations(users, ({ many }) => ({

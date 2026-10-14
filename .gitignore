@@ -1,4 +1,8 @@
 node_modules
 .env
+.env.local
 .next
+.opencode
+gemini-debug.json
 gemini-error.log
+out

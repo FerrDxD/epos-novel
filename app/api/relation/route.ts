@@ -3,6 +3,7 @@ import { db } from "../../../lib/db";
 import { entryRelations } from "../../../lib/db/schema";
 import { auth } from "../../../lib/auth";
 import { eq, and } from "drizzle-orm";
+import { relationCreateSchema, formatZodError } from "../../../lib/validators";
 
 export async function POST(req: Request) {
   try {
@@ -10,17 +11,16 @@ export async function POST(req: Request) {
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { codexId, sourceEntryId, targetEntryId, relationLabel } = body;
-
-    if (!codexId || !sourceEntryId || !targetEntryId || !relationLabel) {
-      return NextResponse.json({ error: "Semua field relasi wajib diisi" }, { status: 400 });
+    const parsed = relationCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
     }
+    const { codexId, sourceEntryId, targetEntryId, relationLabel } = parsed.data;
 
     if (sourceEntryId === targetEntryId) {
       return NextResponse.json({ error: "Entri tidak bisa berelasi dengan dirinya sendiri" }, { status: 400 });
     }
 
-    // Cek duplikat
     const existing = await db
       .select()
       .from(entryRelations)
