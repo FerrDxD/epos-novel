@@ -53,14 +53,14 @@ M0 Fondasi ──► M1 Benteng ──► M2 UX ──► M3 AI ──► M4 Kol
 - Query list entries makin lambat saat data >1000.
 
 #### Tasks
-- [ ] **ENV:** Buat `lib/env.ts` pakai `zod` untuk validasi semua env. Buat `.env.example`.
-- [ ] **ENV:** Sinkronkan penamaan: pilih `GOOGLE_CLIENT_ID` / `AUTH_GOOGLE_ID` (hapus yang satu).
-- [ ] **FIX:** Hapus `fs.writeFileSync` di `lib/gemini.ts:90` & `:103` -> ganti `console.debug` atau `pino`.
-- [ ] **VALIDATION:** Pasang `zod` di semua `app/api/*` (`codex`, `entry`, `import`, `relation`, `register`).
-- [ ] **DB:** Ganti `category text` -> `pgEnum("category", ["characters", "locations", ...])` di `lib/db/schema.ts`.
-- [ ] **DB:** Tambah Index: `index("entries_codex_idx").on(entries.codexId)` dan `index("entries_user_idx").on(entries.userId)`.
-- [ ] **DX:** Pasang `eslint` + `prettier` + `husky` pre-commit + `lint-staged`.
-- [ ] **GIT:** Update `.gitignore` -> tambah `gemini-debug.json`, `gemini-error.log`, `.env.local`.
+- [x] **ENV:** Buat `lib/env.ts` pakai `zod` untuk validasi semua env. Buat `.env.example`. — *done 14 Okt: `lib/env.ts` + `.env.example`, dukung `SKIP_ENV_VALIDATION`*
+- [x] **ENV:** Sinkronkan penamaan: pilih `GOOGLE_CLIENT_ID` / `AUTH_GOOGLE_ID` (hapus yang satu). — *done: `lib/env.ts` resolve alias, `lib/auth.config.ts` pakai `env.resolvedGoogleId/Secret`*
+- [x] **FIX:** Hapus `fs.writeFileSync` di `lib/gemini.ts:90` & `:103` -> ganti `console.debug` atau `pino`. — *done: lazy `getModel()`, debug via `console.debug` only*
+- [x] **VALIDATION:** Pasang `zod` di semua `app/api/*` (`codex`, `entry`, `import`, `relation`, `register`). — *done: `lib/validators.ts` (offline-safe fallback) + `codex`, `codex/[codexId]`, `entry`, `entry/[entryId]`, `relation`, `register`. Import formData menyusul M3 (butuh schema multipart)*
+- [x] **DB:** Ganti `category text` -> `pgEnum("category", ["characters", "locations", ...])` di `lib/db/schema.ts`. — *done + `importStatusEnum`/`sourceTypeEnum`*
+- [x] **DB:** Tambah Index: `index("entries_codex_idx").on(entries.codexId)` dan `index("entries_user_idx").on(entries.userId)`. — *done + `category`, `codex_category`, `relations`, `import_logs` indexes*
+- [ ] **DX:** Pasang `eslint` + `prettier` + `husky` pre-commit + `lint-staged`. — *pending, tidak blokir build; kerjakan saat online*
+- [x] **GIT:** Update `.gitignore` -> tambah `gemini-debug.json`, `gemini-error.log`, `.env.local`. — *done*
 
 #### Deliverable
 > `npm run build` sukses tanpa env, semua API return `400` dengan pesan `ZodError` yang jelas jika input salah.
