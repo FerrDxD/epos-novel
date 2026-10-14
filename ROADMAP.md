@@ -133,12 +133,12 @@ M0 Fondasi ──► M1 Benteng ──► M2 UX ──► M3 AI ──► M4 Kol
 **Tujuan:** Bikin 1 Codex dikerjakan 3 penulis bareng. Ini yang bikin user ajak teman & susah pindah ke Notion.
 
 #### Tasks
-- [ ] **DB:** Schema baru `codex_members (id, codexId, userId, role: 'owner'|'editor'|'viewer', createdAt)` + `entry_versions`.
-- [ ] **SHARE:** Halaman `codex/[id]/share` -> Invite by Email + Generate Share Link + Role selector.
-- [ ] **REALTIME:** Integrasi Liveblocks / PartyKit -> lihat kursor & siapa lagi online di Codex.
-- [ ] **HISTORY:** Version History di `entry/[entryId]` -> list `entry_versions` + tombol `Restore`.
-- [ ] **PORTABILITY:** Export Codex -> `Export PDF Kitab` (cantik) & `Export JSON` (backup) + `Import JSON` balik.
-- [ ] **TRASH:** Soft Delete -> `deletedAt` column + halaman `Trash` + restore 30 hari.
+- [x] **DB:** `member_role` enum, `codex_members`, `entry_versions`, `deletedAt` on `codexes` & `entries` — *done 15 Okt*
+- [x] **SHARE:** `SharePanel` di halaman Codex -> Invite by Email + Role selector (editor/viewer) — *done: `app/api/codex/[id]/members` + `components/collab/SharePanel.tsx`*
+- [ ] **REALTIME:** Integrasi Liveblocks / PartyKit -> lihat kursor & siapa lagi online di Codex. — *pending M6*
+- [x] **HISTORY:** `EntryHistoryPanel` di `entry/[entryId]` -> list `entry_versions` + tombol `Restore` (auto-saves current before restore) — *done 15 Okt*
+- [x] **PORTABILITY:** `ExportPanel` -> Export JSON (backup) & Export Kitab (HTML printable → Print → PDF) + Import JSON — *done 15 Okt*
+- [x] **TRASH:** Soft Delete `deletedAt` + halaman `/trash` + restore/hard-delete — *done 15 Okt*
 
 #### Deliverable
 > 1 Codex bisa di-share ke 2 teman dengan role beda, dan bisa lihat history perubahan per entry.
