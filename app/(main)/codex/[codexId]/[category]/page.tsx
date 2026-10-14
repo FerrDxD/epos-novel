@@ -1,7 +1,7 @@
 import { db } from "../../../../../lib/db";
 import { codexes, entries } from "../../../../../lib/db/schema";
 import { auth } from "../../../../../lib/auth";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, isNull } from "drizzle-orm";
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, Plus, Clock, LayoutGrid } from "lucide-react";
@@ -9,6 +9,7 @@ import ThemeToggle from "../../../../../components/ui/ThemeToggle";
 import CategoryBadge, { CATEGORY_LABELS, CATEGORY_ICONS, CategoryType } from "../../../../../components/codex/CategoryBadge";
 import EntryCard from "../../../../../components/entry/EntryCard";
 import TimelineView from "../../../../../components/codex/TimelineView";
+import { requireCanRead } from "../../../../../lib/collab";
 
 const VALID_CATEGORIES = ["characters", "locations", "factions", "events", "concepts", "monsters"];
 
@@ -23,18 +24,14 @@ export default async function CategoryPage({ params, searchParams }: { params: {
     notFound();
   }
 
-  const [codex] = await db
-    .select()
-    .from(codexes)
-    .where(eq(codexes.id, codexId))
-    .limit(1);
-
-  if (!codex || codex.userId !== session.user.id) redirect("/dashboard");
+  const chk = await requireCanRead(codexId, session.user.id);
+  if (!chk.ok) redirect("/dashboard");
+  const codex = chk.acc.codex;
 
   const categoryEntries = await db
     .select()
     .from(entries)
-    .where(and(eq(entries.codexId, codexId), eq(entries.category, category)))
+    .where(and(eq(entries.codexId, codexId), eq(entries.category, category as any), isNull(entries.deletedAt)))
     .orderBy(desc(entries.updatedAt));
 
   const catKey = category as CategoryType;

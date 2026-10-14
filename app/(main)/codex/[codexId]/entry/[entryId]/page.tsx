@@ -9,12 +9,17 @@ import ReactMarkdown from "react-markdown";
 import ThemeToggle from "../../../../../../components/ui/ThemeToggle";
 import CategoryBadge, { CATEGORY_COLORS, CategoryType } from "../../../../../../components/codex/CategoryBadge";
 import RelationsPanel from "../../../../../../components/entry/RelationsPanel";
+import EntryHistoryPanel from "../../../../../../components/entry/EntryHistoryPanel";
+import { requireCanRead } from "../../../../../../lib/collab";
 
 export default async function EntryDetailPage({ params }: { params: { codexId: string, entryId: string } }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
   const { codexId, entryId } = params;
+  const chk = await requireCanRead(codexId, session.user.id);
+  if (!chk.ok) redirect("/dashboard");
+  const canWrite = chk.acc.canWrite;
 
   // Fetch target entry
   const [entry] = await db
@@ -24,6 +29,7 @@ export default async function EntryDetailPage({ params }: { params: { codexId: s
     .limit(1);
 
   if (!entry) notFound();
+  if (entry.deletedAt) notFound();
 
   // Fetch all relations involving this entry
   const relations = await db
@@ -189,12 +195,8 @@ export default async function EntryDetailPage({ params }: { params: { codexId: s
             </div>
 
             {/* Relations Panel */}
-            <RelationsPanel 
-              codexId={codexId} 
-              entryId={entryId} 
-              relations={relations} 
-              allEntries={allEntries} 
-            />
+            <RelationsPanel codexId={codexId} entryId={entryId} relations={relations} allEntries={allEntries} />
+            <EntryHistoryPanel entryId={entryId} canWrite={canWrite} />
 
           </div>
         </div>

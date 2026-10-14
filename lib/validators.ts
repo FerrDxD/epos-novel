@@ -34,6 +34,9 @@ let entryCreateSchema: any;
 let entryPatchSchema: any;
 let relationCreateSchema: any;
 let registerSchema: any;
+let shareInviteSchema: any;
+let shareRoleSchema: any;
+let entryVersionRestoreSchema: any;
 
 if (zodAvailable) {
   categoryEnum = z.enum(["characters", "locations", "factions", "events", "concepts", "monsters"]);
@@ -80,6 +83,17 @@ if (zodAvailable) {
     username: z.string().min(3, "Username minimal 3 karakter").max(20).regex(/^[a-zA-Z0-9_]+$/, "Username hanya boleh huruf, angka, underscore"),
     email: z.string().email("Email tidak valid").transform((v: string) => v.toLowerCase().trim()),
     password: z.string().min(6, "Password minimal 6 karakter").max(100),
+  });
+  shareInviteSchema = z.object({
+    email: z.string().email("Email tidak valid").transform((v: string) => v.toLowerCase().trim()),
+    role: z.enum(["editor", "viewer"]).default("viewer"),
+  });
+  shareRoleSchema = z.object({
+    userId: uuidSchema,
+    role: z.enum(["editor", "viewer"]),
+  });
+  entryVersionRestoreSchema = z.object({
+    versionId: uuidSchema,
   });
 } else {
   // ── FALLBACK MODE (no zod) — manual safeParse shims ─────────────────────
@@ -175,9 +189,33 @@ if (zodAvailable) {
       return ok({ name: b.name, username: b.username, email: b.email.toLowerCase().trim(), password: b.password });
     },
   };
+  shareInviteSchema = {
+    safeParse(b: any) {
+      if (!b || typeof b !== "object") return fail([], "Body harus object");
+      if (typeof b.email !== "string" || !isEmail(b.email)) return fail(["email"], "Email tidak valid");
+      const role = b.role || "viewer";
+      if (!["editor", "viewer"].includes(role)) return fail(["role"], "Role harus editor/viewer");
+      return ok({ email: b.email.toLowerCase().trim(), role });
+    },
+  };
+  shareRoleSchema = {
+    safeParse(b: any) {
+      if (!b || typeof b !== "object") return fail([], "Body harus object");
+      if (!isUUID(String(b.userId))) return fail(["userId"], "userId harus UUID");
+      if (!["editor", "viewer"].includes(b.role)) return fail(["role"], "Role harus editor/viewer");
+      return ok(b);
+    },
+  };
+  entryVersionRestoreSchema = {
+    safeParse(b: any) {
+      if (!b || typeof b !== "object") return fail([], "Body harus object");
+      if (!isUUID(String(b.versionId))) return fail(["versionId"], "versionId harus UUID");
+      return ok(b);
+    },
+  };
 }
 
-export { categoryEnum, uuidSchema, codexCreateSchema, codexPatchSchema, entryCreateSchema, entryPatchSchema, relationCreateSchema, registerSchema };
+export { categoryEnum, uuidSchema, codexCreateSchema, codexPatchSchema, entryCreateSchema, entryPatchSchema, relationCreateSchema, registerSchema, shareInviteSchema, shareRoleSchema, entryVersionRestoreSchema };
 
 export function formatZodError(error: any): string {
   const first = error?.issues?.[0];

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, integer, jsonb, pgEnum, index, unique } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Enum — M0: cegah category ngawur
@@ -13,6 +13,7 @@ export const categoryEnum = pgEnum("category", [
 
 export const importStatusEnum = pgEnum("import_status", ["pending", "processing", "done", "failed"]);
 export const sourceTypeEnum = pgEnum("source_type", ["docx", "pdf", "md", "json", "gdocs", "gdrive"]);
+export const memberRoleEnum = pgEnum("member_role", ["owner", "editor", "viewer"]);
 
 // 1. Table: users
 export const users = pgTable("users", {
@@ -39,6 +40,7 @@ export const codexes = pgTable("codexes", {
   entryCount: integer("entry_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  deletedAt: timestamp("deleted_at"),
 });
 
 // 3. Table: entries
@@ -61,6 +63,7 @@ export const entries = pgTable(
     metadata: jsonb("metadata"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
   (t) => ({
     codexIdx: index("entries_codex_idx").on(t.codexId),
@@ -139,12 +142,63 @@ export const usageLogs = pgTable(
   })
 );
 
+// 7. M4: codex members — kolaborasi
+export const codexMembers = pgTable(
+  "codex_members",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    codexId: uuid("codex_id")
+      .notNull()
+      .references(() => codexes.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: memberRoleEnum("role").notNull().default("viewer"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    codexIdx: index("codex_members_codex_idx").on(t.codexId),
+    userIdx: index("codex_members_user_idx").on(t.userId),
+    uniq: unique("codex_member_unique").on(t.codexId, t.userId),
+  })
+);
+
+// 8. M4: entry versions — version history
+export const entryVersions = pgTable(
+  "entry_versions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entryId: uuid("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    codexId: uuid("codex_id")
+      .notNull()
+      .references(() => codexes.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    versionNumber: integer("version_number").notNull(),
+    title: text("title").notNull(),
+    summary: text("summary"),
+    content: text("content"),
+    tags: text("tags").array().notNull().default([] as unknown as string),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    entryIdx: index("entry_versions_entry_idx").on(t.entryId),
+    codexIdx: index("entry_versions_codex_idx").on(t.codexId),
+  })
+);
+
 // Relationships
 export const usersRelations = relations(users, ({ many }) => ({
   codexes: many(codexes),
   entries: many(entries),
   importLogs: many(importLogs),
   usageLogs: many(usageLogs),
+  codexMembers: many(codexMembers),
+  entryVersions: many(entryVersions),
 }));
 
 export const codexesRelations = relations(codexes, ({ one, many }) => ({
@@ -155,6 +209,8 @@ export const codexesRelations = relations(codexes, ({ one, many }) => ({
   entries: many(entries),
   relations: many(entryRelations),
   importLogs: many(importLogs),
+  members: many(codexMembers),
+  versions: many(entryVersions),
 }));
 
 export const entriesRelations = relations(entries, ({ one, many }) => ({
@@ -168,6 +224,7 @@ export const entriesRelations = relations(entries, ({ one, many }) => ({
   }),
   outgoingRelations: many(entryRelations, { relationName: "sourceRelations" }),
   incomingRelations: many(entryRelations, { relationName: "targetRelations" }),
+  versions: many(entryVersions),
 }));
 
 export const entryRelationsRelations = relations(entryRelations, ({ one }) => ({
@@ -211,4 +268,15 @@ export const usageLogsRelations = relations(usageLogs, ({ one }) => ({
     fields: [usageLogs.importLogId],
     references: [importLogs.id],
   }),
+}));
+
+export const codexMembersRelations = relations(codexMembers, ({ one }) => ({
+  codex: one(codexes, { fields: [codexMembers.codexId], references: [codexes.id] }),
+  user: one(users, { fields: [codexMembers.userId], references: [users.id] }),
+}));
+
+export const entryVersionsRelations = relations(entryVersions, ({ one }) => ({
+  entry: one(entries, { fields: [entryVersions.entryId], references: [entries.id] }),
+  codex: one(codexes, { fields: [entryVersions.codexId], references: [codexes.id] }),
+  user: one(users, { fields: [entryVersions.userId], references: [users.id] }),
 }));

@@ -8,6 +8,20 @@
       "when": 1781605389048,
       "tag": "0000_ordinary_quicksilver",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781640000000,
+      "tag": "0001_gigantic_tattoo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781650000000,
+      "tag": "0001_kind_black_tom",
+      "breakpoints": true
     }
   ]
 }

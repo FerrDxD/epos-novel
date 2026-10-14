@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "../../../lib/db";
 import { entries, codexes } from "../../../lib/db/schema";
 import { auth } from "../../../lib/auth";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, isNull } from "drizzle-orm";
 import { generateEntrySummary } from "../../../lib/gemini";
 import { entryCreateSchema, categoryEnum, formatZodError } from "../../../lib/validators";
 import { sanitizeHtml } from "../../../lib/sanitize";
 import { checkRateLimit } from "../../../lib/rate-limit";
+import { requireCanRead, requireCanWrite } from "../../../lib/collab";
 
 export async function GET(req: Request) {
   try {
@@ -22,12 +23,14 @@ export async function GET(req: Request) {
 
     if (!codexId) return NextResponse.json({ error: "codexId is required" }, { status: 400 });
 
+    const chk = await requireCanRead(codexId, session.user.id);
+    if (!chk.ok) return NextResponse.json({ error: chk.error }, { status: chk.status });
     if (category) {
       const catParsed = categoryEnum.safeParse(category);
       if (!catParsed.success) return NextResponse.json({ error: formatZodError(catParsed.error) }, { status: 400 });
     }
 
-    const conditions = [eq(entries.codexId, codexId), eq(entries.userId, session.user.id)];
+    const conditions: any[] = [eq(entries.codexId, codexId), isNull(entries.deletedAt)];
     if (category) conditions.push(eq(entries.category, category as any));
 
     // Backward-compat: if no pagination params, return plain array (old clients)
@@ -74,6 +77,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
     }
     let { codexId, category, title, summary, content, tags, metadata } = parsed.data;
+
+    const chkW = await requireCanWrite(codexId, session.user.id);
+    if (!chkW.ok) return NextResponse.json({ error: chkW.error }, { status: chkW.status });
 
     // Sanitize rich content before storing
     const cleanContent = content ? sanitizeHtml(content) : "";

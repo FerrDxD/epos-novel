@@ -1,13 +1,16 @@
 import { db } from "../../../../lib/db";
-import { codexes, entries, entryRelations } from "../../../../lib/db/schema";
+import { codexes, entries, entryRelations, codexMembers, users } from "../../../../lib/db/schema";
 import { auth } from "../../../../lib/auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Edit, Trash2, Plus, Upload, LayoutGrid, Network } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Plus, Upload, LayoutGrid, Network, Users as UsersIcon, Download } from "lucide-react";
 import CategoryBadge, { CATEGORY_COLORS, CategoryType } from "../../../../components/codex/CategoryBadge";
 import EntryGrid from "../../../../components/entry/EntryGrid";
 import CodexGraph from "../../../../components/codex/CodexGraph";
+import SharePanel from "../../../../components/collab/SharePanel";
+import ExportPanel from "../../../../components/collab/ExportPanel";
+import { getCodexAccess } from "../../../../lib/collab";
 
 export default async function CodexDetailPage({ params, searchParams }: { params: { codexId: string }, searchParams: { view?: string } }) {
   const session = await auth();
@@ -16,18 +19,16 @@ export default async function CodexDetailPage({ params, searchParams }: { params
   const { codexId } = params;
   const viewMode = searchParams.view === "graph" ? "graph" : "list";
 
-  const [codex] = await db
-    .select()
-    .from(codexes)
-    .where(eq(codexes.id, codexId))
-    .limit(1);
-
-  if (!codex || codex.userId !== session.user.id) redirect("/dashboard");
+  const acc = await getCodexAccess(codexId, session.user.id);
+  if (!acc || !acc.canRead) redirect("/dashboard");
+  const codex = acc.codex;
+  const isOwner = acc.isOwner;
+  const canWrite = acc.canWrite;
 
   const codexEntries = await db
     .select()
     .from(entries)
-    .where(eq(entries.codexId, codexId))
+    .where(and(eq(entries.codexId, codexId), isNull(entries.deletedAt)))
     .orderBy(desc(entries.updatedAt))
     .limit(12); // initial page; rest via infinite scroll
 
@@ -36,6 +37,20 @@ export default async function CodexDetailPage({ params, searchParams }: { params
     .from(entryRelations)
     .where(eq(entryRelations.codexId, codexId));
 
+  let members: any[] = [];
+  let ownerUser: any = null;
+  if (isOwner) {
+    const raw = await db.select().from(codexMembers).where(eq(codexMembers.codexId, codexId));
+    members = await Promise.all(raw.map(async (m) => {
+      const [u] = await db.select({ id: users.id, name: users.name, email: users.email, image: users.image, username: users.username }).from(users).where(eq(users.id, m.userId)).limit(1);
+      return { ...m, user: u || null };
+    }));
+    const [ou] = await db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(eq(users.id, codex.userId)).limit(1);
+    ownerUser = ou || null;
+  } else {
+    const [ou] = await db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(eq(users.id, codex.userId)).limit(1);
+    ownerUser = ou || null;
+  }
   // Calculate stats
   const stats = codexEntries.reduce((acc, entry) => {
     acc[entry.category] = (acc[entry.category] || 0) + 1;
@@ -85,6 +100,11 @@ export default async function CodexDetailPage({ params, searchParams }: { params
               <h1 className="font-display font-black text-4xl md:text-5xl text-[var(--color-text)] tracking-wide">
                 {codex.title}
               </h1>
+              {!isOwner && (
+                <span className="ml-2 px-3 py-1 text-[10px] tracking-[0.2em] uppercase font-mono border border-[var(--color-gold-muted)] text-[var(--color-gold)] bg-[var(--color-surface)]">
+                  {acc.role === "editor" ? "Editor" : "Viewer"} · milik {ownerUser?.name || ownerUser?.email}
+                </span>
+              )}
             </div>
             {codex.description && (
               <p className="font-body text-xl italic text-[var(--color-text-muted)] max-w-3xl mb-6">
@@ -112,6 +132,12 @@ export default async function CodexDetailPage({ params, searchParams }: { params
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
+        </div>
+
+        {/* Collab bars */}
+        <div className="grid md:grid-cols-2 gap-6 mb-10">
+          <SharePanel codexId={codexId} isOwner={isOwner} owner={ownerUser} members={members} />
+          <ExportPanel codexId={codexId} canWrite={canWrite} />
         </div>
 
         {/* Stats Bar (Tome Style) */}

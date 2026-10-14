@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { db } from "../../../lib/db";
 import { codexes } from "../../../lib/db/schema";
 import { auth } from "../../../lib/auth";
-import { eq, desc } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { codexCreateSchema, formatZodError } from "../../../lib/validators";
+import { getAccessibleCodexes } from "../../../lib/collab";
 
 export async function GET() {
   try {
@@ -12,11 +13,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userCodexes = await db
-      .select()
-      .from(codexes)
-      .where(eq(codexes.userId, session.user.id))
-      .orderBy(desc(codexes.updatedAt));
+    const userCodexes = await getAccessibleCodexes(session.user.id);
+    userCodexes.sort((a, b) => new Date(b.updatedAt as any).getTime() - new Date(a.updatedAt as any).getTime());
 
     return NextResponse.json(userCodexes);
   } catch (error) {

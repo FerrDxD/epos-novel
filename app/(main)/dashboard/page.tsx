@@ -1,24 +1,23 @@
 import { db } from "../../../lib/db";
-import { codexes } from "../../../lib/db/schema";
+import { codexes, codexMembers, users } from "../../../lib/db/schema";
 import { auth, signOut } from "../../../lib/auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, isNull, inArray } from "drizzle-orm";
 import Link from "next/link";
 import CodexCard from "../../../components/codex/CodexCard";
 import ThemeToggle from "../../../components/ui/ThemeToggle";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { redirect } from "next/navigation";
-
+import { getAccessibleCodexes } from "../../../lib/collab";
 import CelestialBackground from "../../../components/ui/CelestialBackground";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const userCodexes = await db
-    .select()
-    .from(codexes)
-    .where(eq(codexes.userId, session.user.id))
-    .orderBy(desc(codexes.updatedAt));
+  const all = await getAccessibleCodexes(session.user.id);
+  all.sort((a, b) => new Date(b.updatedAt as any).getTime() - new Date(a.updatedAt as any).getTime());
+  const owned = all.filter((c) => c.userId === session.user.id);
+  const shared = all.filter((c) => c.userId !== session.user.id);
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors duration-200 relative overflow-hidden flex flex-col">
@@ -34,6 +33,9 @@ export default async function DashboardPage() {
             E P O S
           </Link>
           <div className="flex items-center gap-6">
+            <Link href="/trash" className="font-display text-[10px] tracking-[0.2em] uppercase text-[var(--color-text-muted)] hover:text-[var(--color-gold)] flex items-center gap-2">
+              <Trash2 className="w-3.5 h-3.5" /> Sampah
+            </Link>
             <ThemeToggle />
             <div className="flex items-center gap-4">
               <div className="font-display text-[10px] text-[var(--color-text-muted)] tracking-widest uppercase border border-[var(--color-border)] px-4 py-1.5 bg-[var(--color-surface)]">
@@ -78,7 +80,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {userCodexes.length === 0 ? (
+        {all.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 px-4 border border-[var(--color-border)] bg-[var(--color-surface)]/30">
             <h3 className="font-display font-bold text-2xl text-[var(--color-gold)] mb-4 tracking-widest uppercase">
               Rak Masih Kosong
@@ -94,11 +96,23 @@ export default async function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {userCodexes.map((codex) => (
-              <CodexCard key={codex.id} codex={codex} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {owned.map((codex) => (
+                <CodexCard key={codex.id} codex={codex} />
+              ))}
+            </div>
+            {shared.length > 0 && (
+              <>
+                <h2 className="mt-16 mb-6 font-display text-xs tracking-[0.3em] uppercase text-[var(--color-gold-muted)]">Dibagikan kepadamu</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {shared.map((codex) => (
+                    <CodexCard key={codex.id} codex={codex} />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         )}
       </main>
     </div>

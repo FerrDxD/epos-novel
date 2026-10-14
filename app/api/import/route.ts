@@ -13,6 +13,7 @@ import { sanitizeHtml } from "../../../lib/sanitize";
 import { checkRateLimit } from "../../../lib/rate-limit";
 import { checkTokenBudget, estimateTokens } from "../../../lib/ai-helpers";
 import { usageLogs } from "../../../lib/db/schema";
+import { requireCanWrite } from "../../../lib/collab";
 
 const ALLOWED_SOURCE_TYPES = ["docx", "pdf", "md", "json", "gdocs", "gdrive"] as const;
 
@@ -69,13 +70,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "URL wajib untuk gdocs/gdrive" }, { status: 400 });
     }
 
-    const [codex] = await db
-      .select()
-      .from(codexes)
-      .where(and(eq(codexes.id, codexId), eq(codexes.userId, session.user.id)))
-      .limit(1);
-
-    if (!codex) return NextResponse.json({ error: "Codex tidak ditemukan" }, { status: 404 });
+    const chkW = await requireCanWrite(codexId, session.user.id);
+    if (!chkW.ok) return NextResponse.json({ error: chkW.error }, { status: chkW.status });
+    const codex = chkW.acc.codex;
 
     // Cost guard: estimate + reject huge inputs before Gemini call — log usage on success/fail
     // We estimate after parsing, so this is a second guard (prompt guard inside gemini.ts is first).

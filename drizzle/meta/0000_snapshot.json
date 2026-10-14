@@ -1,7 +1,5 @@
 {
-  "id": "2de97dc8-f6bd-43da-9722-2dd244e4303e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "tables": {
     "public.codexes": {
@@ -73,19 +71,22 @@
         "codexes_user_id_users_id_fk": {
           "name": "codexes_user_id_users_id_fk",
           "tableFrom": "codexes",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.entries": {
       "name": "entries",
@@ -172,32 +173,35 @@
         "entries_codex_id_codexes_id_fk": {
           "name": "entries_codex_id_codexes_id_fk",
           "tableFrom": "entries",
-          "tableTo": "codexes",
           "columnsFrom": [
             "codex_id"
           ],
+          "tableTo": "codexes",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "entries_user_id_users_id_fk": {
           "name": "entries_user_id_users_id_fk",
           "tableFrom": "entries",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.relations": {
       "name": "relations",
@@ -247,45 +251,48 @@
         "relations_codex_id_codexes_id_fk": {
           "name": "relations_codex_id_codexes_id_fk",
           "tableFrom": "relations",
-          "tableTo": "codexes",
           "columnsFrom": [
             "codex_id"
           ],
+          "tableTo": "codexes",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "relations_source_entry_id_entries_id_fk": {
           "name": "relations_source_entry_id_entries_id_fk",
           "tableFrom": "relations",
-          "tableTo": "entries",
           "columnsFrom": [
             "source_entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "relations_target_entry_id_entries_id_fk": {
           "name": "relations_target_entry_id_entries_id_fk",
           "tableFrom": "relations",
-          "tableTo": "entries",
           "columnsFrom": [
             "target_entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.import_logs": {
       "name": "import_logs",
@@ -349,32 +356,35 @@
         "import_logs_user_id_users_id_fk": {
           "name": "import_logs_user_id_users_id_fk",
           "tableFrom": "import_logs",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "import_logs_codex_id_codexes_id_fk": {
           "name": "import_logs_codex_id_codexes_id_fk",
           "tableFrom": "import_logs",
-          "tableTo": "codexes",
           "columnsFrom": [
             "codex_id"
           ],
+          "tableTo": "codexes",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
     "public.users": {
       "name": "users",
@@ -438,26 +448,35 @@
       "uniqueConstraints": {
         "users_username_unique": {
           "name": "users_username_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "username"
-          ]
+          ],
+          "nullsNotDistinct": false
         },
         "users_email_unique": {
           "name": "users_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "2de97dc8-f6bd-43da-9722-2dd244e4303e",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }
