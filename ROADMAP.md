@@ -78,14 +78,14 @@ M0 Fondasi ──► M1 Benteng ──► M2 UX ──► M3 AI ──► M4 Kol
 - XSS via `editor.getHTML()` dan SSRF via `gdocs` fetcher.
 
 #### Tasks
-- [ ] **AUTH:** Fix ownership di `app/api/relation/route.ts` DELETE -> cek `relation.codex.userId === session.user.id`.
-- [ ] **AUTH:** Fix PATCH `app/api/entry/[entryId]/route.ts` -> whitelist hanya `["title", "summary", "content", "tags", "metadata", "imageUrl", "category"]`.
-- [ ] **MIDDLEWARE:** Proteksi `/api/*` di `middleware.ts` + tambah Security Headers di `next.config.mjs` (CSP, HSTS, X-Frame-Options).
-- [ ] **RATE LIMIT:** Pasang Upstash Redis. Limit: `register 5/ip/jam`, `import 3/user/hari (free)`, `entry POST 30/menit`.
-- [ ] **XSS:** Sanitasi HTML Tiptap pakai `isomorphic-dompurify` sebelum `db.insert` dan sebelum `dangerouslySetInnerHTML`.
-- [ ] **SSRF:** Tambah timeout 10s + validasi hostname di `lib/parsers/gdocs.ts` (hanya allow `docs.google.com`, `drive.google.com`).
-- [ ] **AUTH:** Normalisasi `email.toLowerCase().trim()` di `register` & `authorize`. Validasi `username` regex `^[a-zA-Z0-9_]{3,20}$`.
-- [ ] **AUTH:** Tambah fitur Lupa Password via `Resend` + token `password_reset_tokens` table.
+- [x] **AUTH:** Fix ownership di `app/api/relation/route.ts` DELETE -> cek `relation.codex.userId === session.user.id`. — *done 14 Okt: POST cek src/tgt belong to user & same codex, DELETE cek codex ownership 403*
+- [x] **AUTH:** Fix PATCH `app/api/entry/[entryId]/route.ts` -> whitelist hanya `["title", "summary", "content", "tags", "metadata", "imageUrl", "category"]`. — *done: zod strict + sanitize*
+- [x] **MIDDLEWARE:** Proteksi `/api/*` di `middleware.ts` + tambah Security Headers di `next.config.mjs` (CSP, HSTS, X-Frame-Options). — *done: middleware matcher `/api/:path*`, next.config headers HSTS/CSP/nosniff*
+- [x] **RATE LIMIT:** Pasang Upstash Redis. Limit: `register 5/ip/jam`, `import 3/user/hari (free)`, `entry POST 30/menit`. — *done: `lib/rate-limit.ts` in-memory (Upstash-ready), register 5/IP/jam, import 5/user/jam, entry 30/menit, relation 60/jam + 429 Retry-After*
+- [x] **XSS:** Sanitasi HTML Tiptap pakai `isomorphic-dompurify` sebelum `db.insert` dan sebelum `dangerouslySetInnerHTML`. — *done: `lib/sanitize.ts` allowlist (tanpa dep tambahan), dipakai di entry create/patch + import*
+- [x] **SSRF:** Tambah timeout 10s + validasi hostname di `lib/parsers/gdocs.ts` (hanya allow `docs.google.com`, `drive.google.com`). — *done: 10s AbortController + redirect host guard + import URL allowlist*
+- [x] **AUTH:** Normalisasi `email.toLowerCase().trim()` di `register` & `authorize`. Validasi `username` regex `^[a-zA-Z0-9_]{3,20}$`. — *done: validators + lib/auth case-insensitive lower()*
+- [ ] **AUTH:** Tambah fitur Lupa Password via `Resend` + token `password_reset_tokens` table. — *pending, butuh Resend API key; kerjakan setelah M1 stabil*
 
 #### Deliverable
 > Lolos simulasi OWASP Top 10 manual. Coba `curl` hapus data orang lain -> `403 Forbidden`.
