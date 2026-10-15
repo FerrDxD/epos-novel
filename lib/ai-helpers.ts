@@ -95,7 +95,7 @@ export function validateExtractedLore(raw: unknown): ExtractedLoreLike {
     (out as Record<string, unknown>)[cat] = valid;
   }
 
-  const total = ALLOWED_CATS.reduce((n, c) => n + (out as Record<string, unknown>)[c].length, 0) as unknown as number;
+  const total = ALLOWED_CATS.reduce((n, c) => n + (out[c as keyof ExtractedLoreLike]).length, 0);
   if (total === 0) {
     // Not fatal — caller may decide to warn
     // But ensure at least empty arrays are present

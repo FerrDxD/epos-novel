@@ -181,7 +181,7 @@ export const entryVersions = pgTable(
     title: text("title").notNull(),
     summary: text("summary"),
     content: text("content"),
-    tags: text("tags").array().notNull().default([] as unknown as string),
+    tags: text("tags").array().notNull().default([] as unknown as string[]),
     metadata: jsonb("metadata"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
