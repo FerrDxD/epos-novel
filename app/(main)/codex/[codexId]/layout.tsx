@@ -2,10 +2,11 @@ import Sidebar from "../../../../components/ui/Sidebar";
 import MobileNav from "../../../../components/ui/MobileNav";
 import CommandPalette from "../../../../components/ui/CommandPalette";
 import { db } from "../../../../lib/db";
-import { codexes, entries } from "../../../../lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { entries } from "../../../../lib/db/schema";
+import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "../../../../lib/auth";
+import { requireCanRead } from "../../../../lib/collab";
 
 export default async function CodexLayout({
   children,
@@ -17,34 +18,36 @@ export default async function CodexLayout({
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [codex] = await db
-    .select()
-    .from(codexes)
-    .where(and(eq(codexes.id, params.codexId), eq(codexes.userId, session.user.id)))
-    .limit(1);
-
-  if (!codex) notFound();
+  const chk = await requireCanRead(params.codexId, session.user.id);
+  if (!chk.ok) notFound();
+  const codex = chk.acc.codex;
 
   // Fetch entries for Command Palette — include summary/tags for fuzzy search
   const allEntries = await db
-    .select({ id: entries.id, title: entries.title, category: entries.category, summary: entries.summary, tags: entries.tags })
+    .select({
+      id: entries.id,
+      title: entries.title,
+      category: entries.category,
+      summary: entries.summary,
+      tags: entries.tags,
+    })
     .from(entries)
     .where(eq(entries.codexId, params.codexId));
 
   return (
     <div className="flex min-h-screen bg-[var(--color-bg)] flex-col md:flex-row">
       <CommandPalette codexId={codex.id} entries={allEntries} />
-      
+
       {/* Desktop Sidebar */}
       <div className="w-64 shrink-0 hidden md:block border-r border-[var(--color-border)]">
         <Sidebar codexId={codex.id} codexTitle={codex.title} />
       </div>
-      
+
       {/* Main Content Area */}
       <div className="flex-1 w-full max-w-full overflow-x-hidden relative flex flex-col">
         {/* Mobile Navigation */}
         <MobileNav codexId={codex.id} codexTitle={codex.title} />
-        
+
         {children}
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import EntryCard from "./EntryCard";
+import { Plus, BookOpen } from "lucide-react";
 
 interface Entry {
   id: string;
@@ -44,7 +45,6 @@ export default function EntryGrid({ codexId, initialEntries, totalCount }: Props
       const res = await fetch(`/api/entry?codexId=${codexId}&page=${nextPage}&limit=${PAGE_SIZE}`);
       if (!res.ok) throw new Error("Failed");
       const data: Entry[] = await res.json();
-      // API may return { entries } or plain array — handle both
       const list = Array.isArray(data) ? data : (data as any).entries || [];
       if (list.length === 0) {
         setHasMore(false);
@@ -76,14 +76,23 @@ export default function EntryGrid({ codexId, initialEntries, totalCount }: Props
 
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 border border-[var(--color-border)] bg-[var(--color-surface)]/30 text-center px-4">
-        <h3 className="font-display font-bold text-2xl text-[var(--color-gold)] mb-4 tracking-widest uppercase">Lembaran Kosong</h3>
-        <p className="font-body text-xl text-[var(--color-text-muted)] mb-8 italic max-w-lg">Belum ada goresan tinta sejarah, tokoh, maupun tempat di dalam kitab ini.</p>
+      <div className="tome-border rounded-xl p-12 sm:p-16 text-center bg-[var(--color-surface)]/80 shadow-xl relative overflow-hidden">
+        <div className="w-12 h-12 mx-auto mb-6 flex items-center justify-center border border-[var(--color-gold)] rotate-45 bg-[var(--color-bg)]">
+          <BookOpen className="w-6 h-6 text-[var(--color-gold)] -rotate-45" />
+        </div>
+
+        <h3 className="font-display font-black text-2xl text-[var(--color-text)] mb-3 tracking-widest uppercase">
+          Lembaran Masih Kosong
+        </h3>
+        <p className="font-body text-xl text-[var(--color-text-muted)] mb-8 italic max-w-lg mx-auto leading-relaxed">
+          Belum ada goresan tinta sejarah, tokoh, maupun tempat di dalam kitab ini. Mulailah mengukir entri ensiklopedia pertama Anda.
+        </p>
         <Link
           href={`/codex/${codexId}/entry/new`}
-          className="px-8 py-3 border border-[var(--color-gold-muted)] hover:border-[var(--color-gold)] text-[var(--color-gold)] font-display text-xs font-bold tracking-[0.2em] uppercase transition-colors"
+          className="inline-flex items-center gap-3 px-8 py-3.5 tome-border rounded-full font-display text-xs font-bold tracking-[0.25em] uppercase text-[var(--color-gold)] shadow-[0_0_15px_rgba(232,208,141,0.15)] hover:scale-105 transition-all"
         >
-          Pahat Lembaran Pertama
+          <span>Pahat Lembaran Pertama</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)] shadow-[0_0_6px_var(--color-gold)]" />
         </Link>
       </div>
     );
@@ -96,11 +105,22 @@ export default function EntryGrid({ codexId, initialEntries, totalCount }: Props
           <EntryCard key={e.id} entry={e as any} />
         ))}
       </div>
-      {/* sentinel */}
-      <div ref={loaderRef} className="h-12 flex items-center justify-center mt-8">
-        {loading && <span className="font-mono text-xs tracking-widest text-[var(--color-gold-muted)] animate-pulse">Memuat…</span>}
+
+      {/* Sentinel / Infinite scroll loader */}
+      <div ref={loaderRef} className="h-16 flex items-center justify-center mt-10">
+        {loading && (
+          <span className="font-mono text-xs tracking-widest text-[var(--color-gold)] uppercase animate-pulse">
+            [ Membuka Gulungan Tambahan... ]
+          </span>
+        )}
         {!hasMore && entries.length > 0 && (
-          <span className="font-mono text-[10px] tracking-widest text-[var(--color-text-muted)] uppercase opacity-60">— Akhir gulungan —</span>
+          <div className="flex items-center gap-4 opacity-50">
+            <div className="w-8 h-[1px] bg-[var(--color-gold-muted)]" />
+            <span className="font-mono text-xs tracking-widest text-[var(--color-text-muted)] uppercase">
+              Akhir Gulungan Kitab
+            </span>
+            <div className="w-8 h-[1px] bg-[var(--color-gold-muted)]" />
+          </div>
         )}
       </div>
     </>
