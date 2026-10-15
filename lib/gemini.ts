@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { requireGeminiKey } from "./env";
-import { checkTokenBudget, validateExtractedLore } from "./ai-helpers";
+import { checkTokenBudget, validateExtractedLore, validateConsistencyResponse } from "./ai-helpers";
 
 function getModel() {
   const apiKey = requireGeminiKey();
@@ -215,7 +215,6 @@ ${loreJson}
       });
       const raw = result.response.text();
       const parsed = extractJson(raw);
-      const { validateConsistencyResponse } = await import("./ai-helpers");
       return validateConsistencyResponse(parsed);
     } catch (e) {
       lastErr = e;

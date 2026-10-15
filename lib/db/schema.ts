@@ -11,8 +11,6 @@ export const categoryEnum = pgEnum("category", [
   "monsters",
 ]);
 
-export const importStatusEnum = pgEnum("import_status", ["pending", "processing", "done", "failed"]);
-export const sourceTypeEnum = pgEnum("source_type", ["docx", "pdf", "md", "json", "gdocs", "gdrive"]);
 export const memberRoleEnum = pgEnum("member_role", ["owner", "editor", "viewer"]);
 
 // 1. Table: users

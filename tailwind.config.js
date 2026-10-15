@@ -23,25 +23,12 @@ module.exports = {
           hover: "var(--color-primary-hover)",
         },
         secondary: "var(--color-secondary)",
-        accent: {
-          magenta: "var(--color-accent-magenta)",
-          coral: "var(--color-accent-coral)",
-        },
         onPrimary: "var(--color-on-primary)",
       },
       fontFamily: {
-        heading: ["Plus Jakarta Sans", "sans-serif"],
-        body: ["DM Sans", "sans-serif"],
-        mono: ["DM Mono", "monospace"],
-      },
-      borderRadius: {
-        card: "12px",
-        input: "8px",
-        badge: "99px",
-      },
-      boxShadow: {
-        light: "0 2px 8px rgba(123,47,190,0.08)",
-        medium: "0 4px 16px rgba(123,47,190,0.12)",
+        display: ["var(--font-cinzel)", "serif"],
+        body: ["var(--font-cormorant)", "serif"],
+        mono: ["var(--font-courier)", "monospace"],
       },
     },
   },

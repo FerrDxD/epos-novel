@@ -85,16 +85,6 @@ body {
     opacity: 1;
   }
 
-  /* Mysterious decryption animation -> Celestial reveal */
-  .encrypt-reveal {
-    animation: reveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  }
-
-  @keyframes reveal {
-    0% { filter: blur(12px); opacity: 0; letter-spacing: 1em; transform: translateY(10px); }
-    100% { filter: blur(0); opacity: 1; letter-spacing: 0.2em; transform: translateY(0); }
-  }
-
   /* Elegant Olympian dividers */
   .ornate-divider-v {
     width: 1px;
@@ -108,14 +98,6 @@ body {
     width: 100%;
     background: linear-gradient(to right, transparent, var(--color-gold), transparent);
     opacity: 0.5;
-  }
-  
-  /* Inputs styling adjustment */
-  .rounded-input {
-    border-radius: 4px;
-  }
-  .rounded-card {
-    border-radius: 8px;
   }
 }
 

@@ -1,15 +1,4 @@
-/**
- * Centralized environment validation — Milestone 0
- * Uses `zod` if available, otherwise falls back to manual checks
- * so `next build` never crashes due to missing dependency.
- */
-
-let z: any = null;
-try {
-  z = require("zod").z;
-} catch {
-  // zod not installed yet — will use manual fallback
-}
+import { z } from "zod";
 
 type Env = {
   DATABASE_URL: string;
@@ -28,38 +17,31 @@ type Env = {
 };
 
 function buildEnv(): Env {
-  if (z) {
-    const schema = z.object({
-      DATABASE_URL: z.string().min(1, "DATABASE_URL wajib diisi"),
-      NEXTAUTH_SECRET: z.string().optional(),
-      AUTH_SECRET: z.string().optional(),
-      NEXTAUTH_URL: z.string().optional(),
-      GOOGLE_CLIENT_ID: z.string().optional(),
-      GOOGLE_CLIENT_SECRET: z.string().optional(),
-      AUTH_GOOGLE_ID: z.string().optional(),
-      AUTH_GOOGLE_SECRET: z.string().optional(),
-      GEMINI_API_KEY: z.string().optional(),
-      NODE_ENV: z.string().default("development"),
-    });
-    const parsed = schema.safeParse(process.env);
-    if (!parsed.success && process.env.SKIP_ENV_VALIDATION !== "1") {
-      const msg = parsed.error.issues.map((i: any) => `  - ${i.path.join(".")}: ${i.message}`).join("\n");
-      if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
-        throw new Error(`❌ Invalid environment variables:\n${msg}`);
-      }
-      console.warn(`⚠️  Env warnings (non-blocking):\n${msg}`);
+  const schema = z.object({
+    DATABASE_URL: z.string().min(1, "DATABASE_URL wajib diisi"),
+    NEXTAUTH_SECRET: z.string().optional(),
+    AUTH_SECRET: z.string().optional(),
+    NEXTAUTH_URL: z.string().optional(),
+    GOOGLE_CLIENT_ID: z.string().optional(),
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
+    AUTH_GOOGLE_ID: z.string().optional(),
+    AUTH_GOOGLE_SECRET: z.string().optional(),
+    GEMINI_API_KEY: z.string().optional(),
+    NODE_ENV: z.string().default("development"),
+  });
+
+  const parsed = schema.safeParse(process.env);
+  if (!parsed.success && process.env.SKIP_ENV_VALIDATION !== "1") {
+    const msg = parsed.error.issues
+      .map((i) => `  - ${i.path.join(".")}: ${i.message}`)
+      .join("\n");
+    if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
+      throw new Error(`❌ Invalid environment variables:\n${msg}`);
     }
-  } else {
-    // Manual fallback — only warn if critical vars missing in production
-    if (!process.env.DATABASE_URL && process.env.NODE_ENV === "production" && process.env.SKIP_ENV_VALIDATION !== "1") {
-      console.warn("⚠️  DATABASE_URL belum di-set");
-    }
-    if (process.env.SKIP_ENV_VALIDATION === "1" && !process.env.DATABASE_URL) {
-      process.env.DATABASE_URL = "postgresql://skip:skip@localhost:5432/skip";
-    }
+    console.warn(`⚠️  Env warnings (non-blocking):\n${msg}`);
   }
 
-  const e = process.env as any;
+  const e = process.env as Record<string, string | undefined>;
   return {
     DATABASE_URL: e.DATABASE_URL || "",
     NEXTAUTH_SECRET: e.NEXTAUTH_SECRET,
