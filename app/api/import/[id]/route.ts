@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "../../../lib/db";
-import { importLogs, usageLogs } from "../../../lib/db/schema";
-import { auth } from "../../../lib/auth";
+import { db } from "../../../../lib/db";
+import { importLogs } from "../../../../lib/db/schema";
+import { auth } from "../../../../lib/auth";
 import { eq, and } from "drizzle-orm";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
