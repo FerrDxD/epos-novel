@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T15:57:00.000Z",
+  "title": "Design System: EPOS",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Chrysos Brilliant Gold",
+        "canonical": "#E8D08D",
+        "tonalRamp": ["#362B0E", "#584617", "#846A25", "#B59339", "#E8D08D", "#F0DFAD", "#F7EDCE", "#FAF5E7"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Fate's Crimson",
+        "canonical": "#C15C5C",
+        "tonalRamp": ["#331010", "#541B1B", "#7E2C2C", "#A34444", "#C15C5C", "#D58A8A", "#E8B8B8", "#F5DDDD"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Celestial Night",
+        "canonical": "#0F111A",
+        "tonalRamp": ["#08090D", "#0F111A", "#171A26", "#212536", "#31364F", "#495074", "#6E77A8", "#9DA4D0"]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Deep Sky Panel",
+        "canonical": "#171924",
+        "tonalRamp": ["#0C0D13", "#171924", "#212433", "#2C3044", "#3D425E", "#545A80", "#767DAA", "#A3A9D1"]
+      },
+      "neutral-border": {
+        "role": "neutral",
+        "displayName": "Starry Slate Border",
+        "canonical": "#4A4657",
+        "tonalRamp": ["#1A1821", "#2A2734", "#3A3645", "#4A4657", "#645F75", "#827C97", "#A5A0B9", "#CCC8DC"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Starlight White",
+        "canonical": "#F2EFE9",
+        "tonalRamp": ["#2C2924", "#504B43", "#797268", "#A8A094", "#CCC5B9", "#E4E0D6", "#F2EFE9", "#FAF9F6"]
+      },
+      "char-gold": {
+        "role": "accent",
+        "displayName": "Olympian Warm Gold",
+        "canonical": "#C2A878",
+        "tonalRamp": ["#2F2410", "#4F3E1E", "#775E30", "#9E7E45", "#C2A878", "#D4C19D", "#E5D9C2", "#F3EDE1"]
+      },
+      "loc-teal": {
+        "role": "accent",
+        "displayName": "Deep Abyssal Teal",
+        "canonical": "#1C2B2D",
+        "tonalRamp": ["#0A1011", "#131D1E", "#1C2B2D", "#293D40", "#395559", "#4E7277", "#6C9AA0", "#93C2C9"]
+      },
+      "fac-crimson": {
+        "role": "accent",
+        "displayName": "Ceremonial War Crimson",
+        "canonical": "#8B1E1E",
+        "tonalRamp": ["#250505", "#430C0C", "#661414", "#8B1E1E", "#B13434", "#CF5757", "#E38484", "#F2BABA"]
+      },
+      "eve-brown": {
+        "role": "accent",
+        "displayName": "Aged Chronicle Umber",
+        "canonical": "#604733",
+        "tonalRamp": ["#1C140E", "#302217", "#473323", "#604733", "#7F6047", "#A07C5F", "#C29F83", "#DFCAA8"]
+      },
+      "con-parchment": {
+        "role": "accent",
+        "displayName": "Faded Akashic Parchment",
+        "canonical": "#E8DCC4",
+        "tonalRamp": ["#2A2417", "#4C422D", "#736547", "#A18F68", "#C8B68F", "#DCD0B4", "#E8DCC4", "#F6F1E6"]
+      },
+      "mon-blood": {
+        "role": "accent",
+        "displayName": "Void Blood Carmine",
+        "canonical": "#3D1313",
+        "tonalRamp": ["#150404", "#250A0A", "#3D1313", "#591E1E", "#7C2D2D", "#A34141", "#C76262", "#E59494"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display (Cinzel)",
+        "purpose": "Hero title, landing proclamations, and major realm headers."
+      },
+      "headline": {
+        "displayName": "Headline (Cinzel)",
+        "purpose": "Modal titles, codex overview headers, and section landmarks."
+      },
+      "title": {
+        "displayName": "Title (Cinzel)",
+        "purpose": "Card titles, entry item names, and category headings."
+      },
+      "body": {
+        "displayName": "Body (Cormorant Garamond)",
+        "purpose": "Manuscript editor text, lore summaries, descriptions, and story reading."
+      },
+      "label": {
+        "displayName": "Label (Courier Prime)",
+        "purpose": "Timestamps, system telemetry, status tags, count badges, and code snippets."
+      }
+    },
+    "shadows": [
+      {
+        "name": "inset-halo",
+        "value": "inset 0 0 20px rgba(232, 208, 141, 0.05)",
+        "purpose": "Subtle divine glow trapped inside translucent tome marble."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 0 30px rgba(194, 168, 120, 0.15)",
+        "purpose": "Gentle solar levitation on hovered Codex and Entry cards."
+      },
+      {
+        "name": "modal-deep",
+        "value": "0 0 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(212,175,55,0.05)",
+        "purpose": "Floating command palette and dialog depth over blurred void."
+      }
+    ],
+    "motion": [
+      {
+        "name": "reveal-celestial",
+        "value": "3.5s cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Atmospheric decrypt reveal for sacred proclamations."
+      },
+      {
+        "name": "ease-tome",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Standard transition for border glows, buttons, and card lifts."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Tome Button",
+      "kind": "button",
+      "refersTo": "button-tome",
+      "description": "Ceremonial pill button with double gold border, shining jewel dot, and hover shimmer.",
+      "html": "<button class=\"ds-btn-tome\"><span class=\"ds-btn-tome-label\">BUKA LEMBARAN EPOS</span><span class=\"ds-btn-tome-jewel\"></span></button>",
+      "css": ".ds-btn-tome { position: relative; display: inline-flex; items-center: center; align-items: center; justify-content: center; gap: 12px; padding: 14px 36px; border-radius: 9999px; background: linear-gradient(135deg, rgba(33, 36, 51, 0.6) 0%, rgba(23, 25, 36, 0.9) 100%); border: 1px solid rgba(232, 208, 141, 0.3); color: #E8D08D; font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 15px rgba(232, 208, 141, 0.05); } .ds-btn-tome:hover { border-color: #E8D08D; color: #FDE08B; box-shadow: 0 0 25px rgba(232, 208, 141, 0.25), inset 0 0 20px rgba(232, 208, 141, 0.1); transform: translateY(-1px); } .ds-btn-tome-jewel { width: 6px; height: 6px; border-radius: 9999px; background: #E8D08D; box-shadow: 0 0 8px #E8D08D; transition: transform 0.3s ease; } .ds-btn-tome:hover .ds-btn-tome-jewel { transform: scale(1.5); }"
+    },
+    {
+      "name": "Secondary Tool Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Austere rectangular action button for secondary tools and confirmations.",
+      "html": "<button class=\"ds-btn-tool\">AKSES INGATAN</button>",
+      "css": ".ds-btn-tool { display: inline-flex; align-items: center; justify-content: center; padding: 8px 24px; border-radius: 9999px; border: 1px solid rgba(232, 208, 141, 0.3); background: transparent; color: #F2EFE9; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: all 0.25s ease; } .ds-btn-tool:hover { border-color: #E8D08D; color: #E8D08D; background: rgba(232, 208, 141, 0.1); box-shadow: 0 0 15px rgba(232, 208, 141, 0.15); }"
+    },
+    {
+      "name": "Inscribed Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Quiet monolithic text input with crisp 4px corners and gold focus transition.",
+      "html": "<input class=\"ds-input-inscribed\" type=\"text\" placeholder=\"Ketik nama tokoh atau naskah...\" value=\"\" />",
+      "css": ".ds-input-inscribed { width: 100%; padding: 12px 16px; border-radius: 4px; border: 1px solid #4A4657; background: #171924; color: #F2EFE9; font-family: 'Courier Prime', monospace; font-size: 14px; outline: none; transition: border-color 0.25s ease, box-shadow 0.25s ease; } .ds-input-inscribed::placeholder { color: #9F9EA6; opacity: 0.7; } .ds-input-inscribed:focus { border-color: #E8D08D; box-shadow: 0 0 10px rgba(232, 208, 141, 0.15); }"
+    },
+    {
+      "name": "Category Entity Badge",
+      "kind": "chip",
+      "refersTo": "badge-category",
+      "description": "Sacred pillar emblem badge with 1px border and category accent color.",
+      "html": "<span class=\"ds-badge-cat\"><svg class=\"ds-badge-cat-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/></svg>TOKOH UTAMA</span>",
+      "css": ".ds-badge-cat { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 4px; border: 1px solid #4A4657; background: #0F111A; color: #C2A878; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; } .ds-badge-cat-icon { width: 14px; height: 14px; stroke: currentColor; opacity: 0.85; }"
+    },
+    {
+      "name": "Entry Card",
+      "kind": "card",
+      "refersTo": "card-entry",
+      "description": "Manuscript leaf card featuring colored ribbon accent, Cinzel title, and italic summary.",
+      "html": "<div class=\"ds-card-entry\"><div class=\"ds-card-entry-ribbon\"></div><div class=\"ds-card-entry-header\"><span class=\"ds-badge-cat\">TOKOH UTAMA</span></div><h4 class=\"ds-card-entry-title\">Raja Arthur dari Pendragon</h4><p class=\"ds-card-entry-excerpt\">Penguasa Camelot yang mencabut Excalibur dari batu altar kuno pada era Kehancuran Pertama.</p><div class=\"ds-card-entry-footer\"><span>PAHATAN TERAKHIR 2 HARI LALU</span></div></div>",
+      "css": ".ds-card-entry { position: relative; display: flex; flex-direction: column; padding: 24px; border-radius: 8px; background: #171924; border: 1px solid rgba(232, 208, 141, 0.3); transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 20px rgba(232, 208, 141, 0.05); cursor: pointer; } .ds-card-entry:hover { background: #212433; border-color: #E8D08D; box-shadow: 0 0 25px rgba(232, 208, 141, 0.15), inset 0 0 20px rgba(232, 208, 141, 0.08); transform: translateY(-2px); } .ds-card-entry-ribbon { position: absolute; top: 0; left: 24px; width: 32px; height: 4px; background: #C2A878; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; } .ds-card-entry-header { margin-top: 4px; margin-bottom: 12px; } .ds-card-entry-title { margin: 0 0 8px 0; font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: #F2EFE9; text-transform: uppercase; transition: color 0.25s ease; } .ds-card-entry:hover .ds-card-entry-title { color: #E8D08D; } .ds-card-entry-excerpt { margin: 0 0 16px 0; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; line-height: 1.5; color: #9F9EA6; } .ds-card-entry-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid #4A4657; font-family: 'Courier Prime', monospace; font-size: 9px; letter-spacing: 0.25em; color: #9F9EA6; text-transform: uppercase; opacity: 0.7; }"
+    },
+    {
+      "name": "Ornate Star-Chart Divider",
+      "kind": "custom",
+      "refersTo": "custom-divider",
+      "description": "Hairline starlight gradient divider with seamless edge fade.",
+      "html": "<div class=\"ds-divider-ornate\"></div>",
+      "css": ".ds-divider-ornate { width: 100%; height: 1px; background: linear-gradient(to right, transparent, #E8D08D, transparent); opacity: 0.4; margin: 16px 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Celestial Scriptorium",
+    "overview": "EPOS is an ancient starlit observatory and marble library where cosmic lore is engraved into digital tablets with gold inlay. The visual world—termed Celestial Marble—fuses the solemnity and architectural permanence of classical antiquity with the infinite depth of deep cosmic space. Every surface, border, and typographical choice is tuned to make authors feel as though they are not merely operating a productivity database, but transcribing sacred canon into the immutable Akashic records.\n\nThe system embraces an austere and restrained philosophy for writing surfaces: clean, translucent containers with refined borders that prioritize raw authorial flow, legibility, and distraction-free creation over frivolous or heavy decorative clutter. Contrast is purposeful and sharp: midnight-sky backdrops (#0F111A) allow Chrysos Brilliant Gold (#E8D08D) accents to shine with celestial luminosity, while delicate hairline star-chart dividers provide architectural grounding without visual noise.",
+    "keyCharacteristics": [
+      "Deep celestial midnight canvases (#0F111A) paired with brilliant Chrysos Gold (#E8D08D) illumination.",
+      "Classical, authoritative titling in all-caps tracked Cinzel balanced by deeply readable Cormorant Garamond literature prose.",
+      "Austere, translucent glassmorphic surfaces (tome-border) with subtle 3px inset borders and ambient golden hover glows.",
+      "Mythic ceremony in functional micro-details: book spine simulations, bookmark ribbons, rotated diamond seals, and star-chart alignment dividers."
+    ],
+    "rules": [
+      {
+        "name": "The Golden Ratio of Gold Rule",
+        "body": "Chrysos Gold is a sacred illumination, not wallpaper. It must never exceed 10% of any screen viewport. Its rarity is what gives it authority; overuse renders the application gaudy rather than mythic.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dual-Phase Realm Rule",
+        "body": "Themes are cosmological shifts, not simple color inversions. Dark mode is 'Night of Chrysos' (deep void with starlight luster); Light mode is 'Dawn of Strife' (pearlescent Olympian marble with deep navy typography and rich gold leaf).",
+        "section": "colors"
+      },
+      {
+        "name": "The Inscription Case Rule",
+        "body": "Cinzel is an epigraphic typeface and must always be rendered in uppercase with generous tracking (tracking-[0.15em] or wider). Never render Cinzel in lowercase or with collapsed letter spacing.",
+        "section": "typography"
+      },
+      {
+        "name": "The Manuscript Line Rule",
+        "body": "Story prose and lore summaries set in Cormorant Garamond must maintain generous vertical breathing room (line-height: 1.6 or greater) and an italic posture for introspective summaries and blockquotes.",
+        "section": "typography"
+      },
+      {
+        "name": "The Inset Glow Rule",
+        "body": "Surfaces glow from the inside before casting shadows outside. Outer shadows are reserved exclusively for interactive elevation responses (hover) and high-priority modal interruptions.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do maintain a strict 90/10 ratio between midnight void surfaces and Chrysos Gold accents.",
+      "Do set all Cinzel headings in uppercase with generous letter spacing (tracking-[0.15em] to tracking-[0.3em]).",
+      "Do use italic Cormorant Garamond for story excerpts, lore descriptions, and blockquotes to preserve literary elegance.",
+      "Do wrap primary interactive cards in .tome-border or double-line gold corner accents.",
+      "Do use subtle hairline gradient dividers (.ornate-divider-h) instead of harsh solid 1px horizontal lines.",
+      "Do preserve the mythic Indonesian nomenclature (Kitab Semesta, Pahat Lembaran, Segel, Tinta Cerita, Mata Pengetahuan)."
+    ],
+    "donts": [
+      "Don't use standard sans-serif system fonts (Inter, Roboto, Arial) for headings or body prose; the entire brand moat relies on Cinzel and Cormorant Garamond.",
+      "Don't use solid bright gold backgrounds for large containers or cards; gold is an ink, wireframe, and aura, never a slab.",
+      "Don't apply heavy, blurry black drop shadows; depth is created with luminous inset glows and subtle elevation shifts.",
+      "Don't use garish neon colors; category accents must remain grounded in rich historical mineral pigments (lapis, crimson, brass, umber).",
+      "Don't introduce noisy medieval paper textures or grungy distressed edges that degrade text clarity."
+    ]
+  }
+}

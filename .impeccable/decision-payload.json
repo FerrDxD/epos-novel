@@ -1,0 +1,73 @@
+{
+  "options": [
+    {
+      "id": "scriptorium-desk",
+      "label": "The Living Scriptorium Desk",
+      "kicker": "THE ROLL",
+      "thesis": "A working author's workstation centered on a live interactive manuscript with dynamic @mention auto-linking and lore consistency sentinel in action.",
+      "palette": [
+        "#E8D08D",
+        "#0F111A",
+        "#171924",
+        "#C15C5C"
+      ],
+      "materials": [
+        "chrysos gold",
+        "celestial marble",
+        "illuminated manuscript",
+        "starry slate"
+      ],
+      "viewport": "Center manuscript scroll with live interactive typing demonstration linking entities, framed by active entity seals and immediate CTA.",
+      "risk": "Requires rich interactive state in the hero rather than static marketing copy."
+    },
+    {
+      "id": "omni-portal",
+      "label": "The Cathedral Archway & Omni-Search Portal",
+      "thesis": "A monumental celestial portico framing a live working Command Palette (Ctrl+K) where visitors immediately search and query lore entities from the first viewport.",
+      "palette": [
+        "#E8D08D",
+        "#0F111A",
+        "#212433",
+        "#C2A878"
+      ],
+      "materials": [
+        "monumental stone",
+        "star charts",
+        "astral glass",
+        "gold leaf"
+      ],
+      "viewport": "Grand Cinzel title over an embedded live search console summoning characters, factions, and spell rules with instant previews.",
+      "risk": "Can feel like an app utility if the mythic ceremony is underplayed."
+    },
+    {
+      "id": "open-folio",
+      "label": "The Open Folio Spread",
+      "thesis": "A two-page open sacred tome on celestial marble: left page visualizes the live interconnected lore graph; right page holds the sacred pact and creation CTA.",
+      "palette": [
+        "#E8D08D",
+        "#0F111A",
+        "#171924",
+        "#E8DCC4"
+      ],
+      "materials": [
+        "book spine leather",
+        "ribbed parchment",
+        "gold corner brackets",
+        "constellation threads"
+      ],
+      "viewport": "Dual-leaf tome opened across the screen with interactive nodes on the left and authorial decree on the right.",
+      "risk": "Needs careful responsive adaptation on mobile screens."
+    }
+  ],
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "steer": true
+}
