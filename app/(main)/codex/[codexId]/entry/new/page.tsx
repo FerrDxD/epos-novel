@@ -62,7 +62,7 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [metadata, setMetadata] = useState<Record<string, any>>({});
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -83,7 +83,12 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
   // Autosave non-editor fields (debounced)
   useEffect(() => {
     const t = setTimeout(() => {
-      try { localStorage.setItem(`${draftKey}:fields`, JSON.stringify({ title, summary, tags, metadata, category })); } catch {}
+      try {
+        localStorage.setItem(
+          `${draftKey}:fields`,
+          JSON.stringify({ title, summary, tags, metadata, category })
+        );
+      } catch {}
     }, 800);
     return () => clearTimeout(t);
   }, [draftKey, title, summary, tags, metadata, category]);
@@ -103,13 +108,13 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(t => t !== tagToRemove));
+    setTags(tags.filter((t) => t !== tagToRemove));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !category) {
-      setError("Judul dan Kategori wajib diisi.");
+      setError("Judul dan Kategori wajib diukir.");
       return;
     }
 
@@ -127,14 +132,13 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
           summary,
           content,
           tags,
-          metadata
+          metadata,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal membuat entri.");
 
-      // Clear autosave draft on success
       try {
         clearDraft(draftKey);
         localStorage.removeItem(`${draftKey}:fields`);
@@ -152,61 +156,69 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] transition-colors duration-200 pb-20">
-      <header className="sticky top-0 z-20 w-full px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 backdrop-blur-md">
+      {/* Top Header */}
+      <header className="sticky top-0 z-20 w-full px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href={`/codex/${params.codexId}`} className="flex items-center gap-3 text-[var(--color-text-muted)] hover:text-[var(--color-gold)] transition-colors group">
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-display text-xs font-bold tracking-[0.2em] uppercase">Urung Memahat</span>
+          <Link
+            href={`/codex/${params.codexId}`}
+            className="flex items-center gap-3 text-[var(--color-text-muted)] hover:text-[var(--color-gold)] transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-display text-xs font-bold tracking-[0.2em] uppercase">
+              Urung Memahat
+            </span>
           </Link>
-          <ThemeToggle />
+          <div className="md:hidden">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <div className="mb-12 flex items-center justify-between border-b border-[var(--color-border)] pb-6 relative">
+      <main className="max-w-6xl mx-auto px-6 sm:px-8 py-10">
+        <div className="mb-10 border-b border-[var(--color-border)] pb-6 relative">
           <div className="absolute bottom-0 left-0 w-32 h-[1px] bg-[var(--color-gold)]" />
-          <div>
-            <h1 className="font-display font-black text-4xl text-[var(--color-text)] mb-2 tracking-widest uppercase">
-              Tulis Lembaran Baru
-            </h1>
-            <p className="font-body italic text-lg text-[var(--color-text-muted)]">
-              Tambahkan detail sejarah, jiwa, atau tempat ke dalam pustaka semesta Anda.
-            </p>
-          </div>
+          <h1 className="font-display font-black text-3xl sm:text-4xl text-[var(--color-text)] mb-2 tracking-wide uppercase">
+            Pahat Lembaran Baru
+          </h1>
+          <p className="font-body italic text-lg text-[var(--color-text-muted)]">
+            Ukir detail entitas semesta, garis keturunan, atau kronik masa lalu ke dalam kitab pusaka Anda.
+          </p>
         </div>
 
         {error && (
-          <div className="mb-8 p-4 border border-[var(--color-crimson)] bg-[var(--color-crimson)]/10 text-[var(--color-crimson)] font-mono text-sm uppercase tracking-wide">
+          <div className="mb-8 p-4 border border-[var(--color-crimson)] bg-[var(--color-crimson)]/10 text-[var(--color-crimson)] font-mono text-xs uppercase tracking-wide rounded">
             [AURA PENOLAKAN] {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-          
-          {/* Editor Column */}
-          <div className="xl:col-span-2 space-y-8">
-            <div className="tome-border bg-[var(--color-surface)] relative">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-[var(--color-gold)] opacity-50" />
-              
-              <div className="p-8 space-y-8">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Main Writing Area (2 cols) */}
+          <div className="xl:col-span-2 space-y-7">
+            <div className="tome-border rounded-xl bg-[var(--color-surface)] relative overflow-hidden shadow-xl">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-gradient-to-r from-transparent via-[var(--color-gold)] to-transparent opacity-60" />
+
+              <div className="p-7 sm:p-8 space-y-7">
                 {/* Category & Title */}
-                <div className="flex flex-col md:flex-row gap-6 items-start">
-                  <div className="w-full md:w-1/3">
-                    <label className="block font-display text-xs font-bold text-[var(--color-gold-muted)] uppercase tracking-[0.2em] mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start">
+                  <div className="sm:col-span-1">
+                    <label className="block font-display text-xs font-bold text-[var(--color-gold)] uppercase tracking-[0.2em] mb-2">
                       Sifat Entitas
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-4 py-3 text-sm font-mono tracking-widest uppercase border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] transition-colors"
+                      className="w-full px-4 py-3 text-xs font-mono tracking-widest uppercase rounded border border-[var(--color-border)] bg-[var(--color-bg)]/80 text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] transition-colors"
                     >
                       {Object.keys(CATEGORY_LABELS).map((cat) => (
-                        <option key={cat} value={cat}>{CATEGORY_LABELS[cat as CategoryType]}</option>
+                        <option key={cat} value={cat}>
+                          {CATEGORY_LABELS[cat as CategoryType]}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  <div className="w-full md:flex-1">
-                    <label className="block font-display text-xs font-bold text-[var(--color-gold-muted)] uppercase tracking-[0.2em] mb-3">
+
+                  <div className="sm:col-span-2">
+                    <label className="block font-display text-xs font-bold text-[var(--color-gold)] uppercase tracking-[0.2em] mb-2">
                       Gelar / Nama Sebutan *
                     </label>
                     <input
@@ -214,92 +226,102 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
                       required
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Misal: Pangeran Terbuang dari Xylos"
-                      className="w-full px-4 py-3 font-display text-xl tracking-wide border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] transition-colors placeholder:font-body placeholder:italic placeholder:text-[var(--color-text-muted)]"
+                      placeholder="Contoh: Pangeran Terbuang dari Xylos"
+                      className="w-full px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-bg)]/80 text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] font-display text-lg tracking-wide placeholder:font-body placeholder:italic placeholder:text-[var(--color-text-muted)]/50"
                     />
                   </div>
                 </div>
 
                 {/* Summary */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="block font-display text-xs font-bold text-[var(--color-gold-muted)] uppercase tracking-[0.2em]">
-                      Bait Pembuka (Opsional)
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block font-display text-xs font-bold text-[var(--color-gold)] uppercase tracking-[0.2em]">
+                      Bait Pembuka / Ringkasan Intisari
                     </label>
-                    <span className="font-mono text-[10px] text-[var(--color-gold)] uppercase tracking-wider flex items-center gap-2 border border-[var(--color-gold-muted)]/50 px-2 py-1 bg-[var(--color-surface-2)]">
+                    <span className="font-mono text-xs text-[var(--color-gold)] uppercase tracking-wider flex items-center gap-1.5 border border-[var(--color-gold-muted)]/50 px-2 py-0.5 rounded bg-[var(--color-surface-2)]">
                       <Sparkles className="w-3 h-3" />
-                      Kosongkan untuk Sihir AI
+                      <span>Kosongkan untuk Ekstraksi AI</span>
                     </span>
                   </div>
                   <textarea
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
-                    rows={2}
-                    placeholder="Satu atau dua bait untuk merangkum esensi dari entitas ini..."
-                    className="w-full px-4 py-4 font-body text-lg italic border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] transition-colors resize-none placeholder:text-[var(--color-text-muted)]"
+                    rows={3}
+                    placeholder="Satu atau dua bait untuk merangkum esensi dan posisi entitas ini dalam kosmos..."
+                    className="w-full px-4 py-3 rounded border border-[var(--color-border)] bg-[var(--color-bg)]/80 text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] font-body text-base italic resize-none leading-relaxed placeholder:text-[var(--color-text-muted)]/50"
                   />
                 </div>
 
-                <div className="w-full flex justify-center opacity-50 py-2">
+                <div className="w-full flex justify-center opacity-40 py-1">
                   <div className="ornate-divider-h w-2/3" />
                 </div>
 
-                {/* Content / Rich Text Editor */}
+                {/* Rich Text Editor */}
                 <div>
-                  <label className="block font-display text-xs font-bold text-[var(--color-gold-muted)] uppercase tracking-[0.2em] mb-3">
-                    Naskah Lengkap
+                  <label className="block font-display text-xs font-bold text-[var(--color-gold)] uppercase tracking-[0.2em] mb-2">
+                    Naskah Lengkap Lembaran
                   </label>
-                  <RichTextEditor 
-                    content={content} 
+                  <RichTextEditor
+                    content={content}
                     onChange={setContent}
                     draftKey={draftKey}
-                    placeholder="Jabarkan sejarah, karakteristik, tragedi, atau kejayaan mereka di sini..."
+                    placeholder="Jabarkan sejarah, karakteristik, asal-usul sihir, tragedi, atau kejayaan mereka di sini..."
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Sidebar Column */}
-          <div className="space-y-8">
-            
+          {/* Right Sidebar: Attributes, Tags & Actions */}
+          <div className="space-y-6">
             {/* Metadata Dynamic Form */}
-            <div className="tome-border bg-[var(--color-surface)]">
-              <h3 className="font-display font-bold text-sm tracking-[0.3em] uppercase text-[var(--color-gold)] p-6 border-b border-[var(--color-border)] bg-[var(--color-surface-2)] flex items-center justify-between">
-                <span>Atribut Khas</span>
+            <div className="tome-border rounded-xl bg-[var(--color-surface)] shadow-lg overflow-hidden">
+              <div className="p-5 border-b border-[var(--color-border)] bg-[var(--color-surface-2)] flex items-center justify-between">
+                <h3 className="font-display font-bold text-xs tracking-[0.25em] uppercase text-[var(--color-gold)]">
+                  Atribut Khas
+                </h3>
                 <CategoryBadge category={category} className="border-none bg-transparent scale-90 origin-right" />
-              </h3>
-              
-              <div className="p-6 space-y-6">
+              </div>
+
+              <div className="p-5 space-y-5">
                 {schema.map((field) => (
                   <div key={field.key} className="relative">
-                    <label className="block font-mono text-[10px] text-[var(--color-gold-muted)] uppercase tracking-widest mb-2">
-                      [ {field.label} ]
+                    <label className="block font-mono text-xs text-[var(--color-gold-muted)] uppercase tracking-wider mb-1.5">
+                      {field.label}
                     </label>
                     {field.type === "text" ? (
                       <input
                         type="text"
                         value={metadata[field.key] || ""}
-                        onChange={(e) => setMetadata({ ...metadata, [field.key]: e.target.value })}
-                        className="w-full px-3 py-2 text-sm font-body italic bg-[var(--color-bg)] border-b border-t-0 border-l-0 border-r-0 border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] focus:ring-0 placeholder-[var(--color-border)]"
+                        onChange={(e) =>
+                          setMetadata({ ...metadata, [field.key]: e.target.value })
+                        }
+                        className="w-full px-3 py-2 rounded text-base font-body italic bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] placeholder-[var(--color-text-muted)]/40"
                         placeholder="Ukir nilai..."
                       />
                     ) : (
                       <input
                         type="text"
-                        value={metadata[field.key] ? metadata[field.key].join(", ") : ""}
-                        onChange={(e) => setMetadata({ 
-                          ...metadata, 
-                          [field.key]: e.target.value.split(",").map(s => s.trim()).filter(Boolean) 
-                        })}
-                        className="w-full px-3 py-2 text-sm font-body italic bg-[var(--color-bg)] border-b border-t-0 border-l-0 border-r-0 border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] focus:ring-0 placeholder-[var(--color-border)]"
+                        value={
+                          metadata[field.key] ? metadata[field.key].join(", ") : ""
+                        }
+                        onChange={(e) =>
+                          setMetadata({
+                            ...metadata,
+                            [field.key]: e.target.value
+                              .split(",")
+                              .map((s) => s.trim())
+                              .filter(Boolean),
+                          })
+                        }
+                        className="w-full px-3 py-2 rounded text-base font-body italic bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] placeholder-[var(--color-text-muted)]/40"
                         placeholder="Pisahkan dengan koma"
                       />
                     )}
                   </div>
                 ))}
                 {schema.length === 0 && (
-                  <p className="font-body text-sm text-[var(--color-text-muted)] italic text-center py-4">
+                  <p className="font-body text-base text-[var(--color-text-muted)] italic text-center py-4">
                     Kategori ini tidak membutuhkan rincian atribut khusus.
                   </p>
                 )}
@@ -307,22 +329,33 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
             </div>
 
             {/* Tags */}
-            <div className="tome-border bg-[var(--color-surface)]">
-              <h3 className="font-display font-bold text-sm tracking-[0.3em] uppercase text-[var(--color-gold)] p-6 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]">
-                Segel Tanda (Tags)
-              </h3>
-              <div className="p-6">
+            <div className="tome-border rounded-xl bg-[var(--color-surface)] shadow-lg overflow-hidden">
+              <div className="p-5 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]">
+                <h3 className="font-display font-bold text-xs tracking-[0.25em] uppercase text-[var(--color-gold)]">
+                  Segel Tanda (Tags)
+                </h3>
+              </div>
+              <div className="p-5">
                 <div className="flex flex-wrap gap-2 mb-4">
                   {tags.map((tag) => (
-                    <span key={tag} className="px-3 py-1.5 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-xs font-mono tracking-wider flex items-center gap-2 group transition-colors hover:border-[var(--color-crimson)]">
-                      {tag}
-                      <button type="button" onClick={() => removeTag(tag)} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-crimson)] transition-colors">
-                        <X className="w-3.5 h-3.5" />
+                    <span
+                      key={tag}
+                      className="px-2.5 py-1 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-xs font-mono tracking-wider flex items-center gap-2 rounded-sm group transition-colors hover:border-[var(--color-crimson)]"
+                    >
+                      <span>{tag}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="text-[var(--color-text-muted)] group-hover:text-[var(--color-crimson)] transition-colors"
+                      >
+                        <X className="w-3 h-3" />
                       </button>
                     </span>
                   ))}
                   {tags.length === 0 && (
-                    <span className="font-body text-sm text-[var(--color-text-muted)] italic">Belum ada segel penanda.</span>
+                    <span className="font-body text-base text-[var(--color-text-muted)] italic">
+                      Belum ada segel penanda.
+                    </span>
                   )}
                 </div>
                 <div className="relative">
@@ -331,30 +364,32 @@ export default function NewEntryPage({ params }: { params: { codexId: string } }
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleAddTag}
-                    placeholder="Tulis segel lalu tekan Enter..."
-                    className="w-full px-4 py-3 font-body italic text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] placeholder-[var(--color-border)]"
+                    placeholder="Ketik segel lalu tekan Enter..."
+                    className="w-full px-3 py-2.5 rounded font-body italic text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:border-[var(--color-gold)] placeholder-[var(--color-text-muted)]/40"
                   />
-                  <Plus className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-border)] pointer-events-none" />
+                  <Plus className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--color-border)] pointer-events-none" />
                 </div>
               </div>
             </div>
 
-            {/* Submit Action */}
+            {/* Submit Action Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 text-sm font-display font-bold tracking-[0.3em] uppercase bg-[var(--color-surface-2)] border border-[var(--color-gold-muted)] hover:border-[var(--color-gold)] hover:bg-[var(--color-surface)] text-[var(--color-gold)] transition-all shadow-[0_0_15px_rgba(194,168,120,0.1)] hover:shadow-[0_0_20px_rgba(194,168,120,0.2)] flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full py-4 rounded-full tome-border font-display text-xs font-bold tracking-[0.25em] uppercase text-[var(--color-gold)] bg-[var(--color-surface)] hover:bg-[var(--color-gold)]/10 shadow-[0_0_20px_rgba(232,208,141,0.15)] hover:shadow-[0_0_30px_rgba(232,208,141,0.25)] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {isLoading ? (
-                <span className="font-mono tracking-widest animate-pulse text-xs text-[var(--color-gold-muted)]">[ MENGUKIR TAKDIR... ]</span>
+                <span className="font-mono tracking-widest animate-pulse text-xs text-[var(--color-gold-muted)]">
+                  [ MENGUKIR TAKDIR... ]
+                </span>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
-                  Pahat Lembaran Ini
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Pahat Lembaran Ini</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)] shadow-[0_0_6px_var(--color-gold)]" />
                 </>
               )}
             </button>
-            
           </div>
         </form>
       </main>
